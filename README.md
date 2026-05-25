@@ -1,89 +1,55 @@
 # 5Ghost WiFi Lab
 
-**Dual-band 2.4 / 5 GHz Wi-Fi security-research tool for the Flipper Zero + BW16 (RTL8720DN).**
+**Dual-band 2.4 / 5 GHz Wi-Fi research on your Flipper Zero — powered by the PINGEQUA 5G WiFi dev board.**
 
-5Ghost turns a Flipper Zero plus an inexpensive BW16 module into a dual-band Wi-Fi
-field lab — scan both 2.4 **and 5 GHz**, map channel congestion, capture WPA
-handshakes, run a captive portal, send beacons, or spin up an AP — behind a clean,
-purpose-built UI with PMF-aware targeting.
+<p align="center">
+  <img src="assets/board-antenna.jpg" width="520" alt="PINGEQUA Flipper Zero 5G WiFi dev board with 8dBi high-gain antenna">
+</p>
 
-> ⚠️ For **authorized testing and education only**. See [Legal](#legal).
+The companion Flipper app for the **PINGEQUA Flipper Zero 5G WiFi board** (RTL8720DN / BW16). Native **5 GHz** *and* 2.4 GHz, **preloaded firmware** — plug it into the GPIO header and go. No wiring, no flashing.
 
-<!-- screenshots: TODO add on-device captures (home / scan list / channel map / about) -->
+## 🛒 Get the board
 
-## Why 5Ghost
-
-- **5 GHz, not just 2.4** — most Flipper Wi-Fi tools are ESP32 (2.4 GHz only). The
-  RTL8720DN adds the 5 GHz band: scanning, channel analysis, and 5 GHz handshake capture.
-- **PMF-aware** — flags APs protected by 802.11w (Protected Management Frames), which are
-  immune to deauth, so you don't waste time on targets that can't be knocked off.
-- **Purpose-built UI** — every screen is custom-drawn for the 128×64 display (scan list,
-  AP detail card, channel map, about), not stock menus.
-
-## Features
-
-| Feature | Notes |
+| | |
 |---|---|
-| **Scan Wi-Fi** | Dual-band passive scan: SSID, RSSI, encryption, PMF, same-SSID mesh markers |
-| **Channel Map** | 2.4 GHz + 5 GHz congestion view; highlights least-busy channels |
-| **Capture Handshake** | WPA/WPA2 4-way handshake on 5 GHz → PCAP (crackable in hashcat/aircrack-ng) |
-| **Deauth** | Targeted deauthentication |
-| **Evil Portal** | Captive-portal credential capture; custom HTML from the SD card |
-| **Create AP / Send Beacon** | Spin up an AP; beacon flood |
+| **[Flipper Zero 5G WiFi Module →](https://www.pingequa.com/products/flipper-zero-5g-wifi-module)** | The dual-band RTL8720DN dev board, preloaded with 5Ghost firmware. |
+| **[5G WiFi Board + 8dBi Antenna →](https://www.pingequa.com/products/flipper-zero-dual-band-5ghz-2-4ghz-wifi-devboard-preloaded-firmware-rtl8720dn-bw16-gpio-module-with-high-gain-8dbi-external-antenna-long-range-iot-network-analysis-packet-monitor-tool)** | Same board bundled with a long-range 8dBi external antenna. |
 
-## Hardware
+> ⚠️ **Designed for the PINGEQUA board only.** Other BW16 / RTL8720DN boards are **not supported** and may not work (different firmware, pinout, or antenna).
 
-- Flipper Zero
-- **BW16 (RTL8720DN)** module wired to the Flipper GPIO UART (pin 13 TX / pin 14 RX, plus GND and 3V3)
-- The BW16 must run the 5Ghost companion firmware (see [Firmware](#firmware-bw16)).
+<p align="center">
+  <img src="assets/board.jpg" width="420" alt="BW16 RTL8720DN module on the PINGEQUA dev board">
+</p>
 
-## Firmware compatibility (Flipper side)
+## What it does
 
-The `.fap` is built and verified against all three major firmwares:
+- **Scan** 2.4 + **5 GHz** networks — SSID, signal, encryption, PMF, same-SSID mesh markers
+- **Channel Map** — spot the least-congested channel across both bands
+- **Capture Handshake** — WPA/WPA2 4-way handshake on 5 GHz → PCAP (crackable in hashcat / aircrack-ng)
+- **Evil Portal** — captive-portal credential capture, with custom HTML from the SD card
+- **Deauth · Create AP · Send Beacon**
 
-| Flipper firmware | Tested build | API | Status |
-|---|---|---|---|
-| Official | 1.4.3 | 87.1 | ✅ |
-| Momentum | mntm-012 | 87.1 | ✅ |
-| Unleashed | unlshd-089 | 87.8 | ✅ |
+…behind a clean, purpose-built UI, with PMF-aware targeting so you don't chase deauth-immune APs.
 
-Download `ghost5_wifi_lab.fap` from [Releases](../../releases) — a single build (API 87.1) loads on all three (87.1 is native on Official/Momentum and backward-compatible on Unleashed's 87.8).
+## Install the app
 
-## Install
+1. Download `ghost5_wifi_lab.fap` from [**Releases**](../../releases).
+2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
+3. Plug in your PINGEQUA 5G board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
-1. Download `ghost5_wifi_lab.fap` from [Releases](../../releases).
-2. Copy it to your Flipper SD card under `/ext/apps/GPIO/` (qFlipper or drag-and-drop).
-3. On the Flipper, open **Apps → GPIO → 5Ghost WiFi Lab**.
-4. Connect a BW16 running the companion firmware.
+One universal build runs on **Official, Momentum, and Unleashed** firmware.
 
-## Firmware (BW16)
+## Good to know
 
-The BW16 companion firmware is **not part of this release** — its distribution is being
-planned separately (the attack layer derives from a GPLv3 upstream; see [NOTICE.md](NOTICE.md)).
-Follow [pingequa.com](https://pingequa.com) for availability.
-
-## Limitations (please read)
-
-- **Mesh deauth**: deauthing one node of a same-SSID mesh often won't drop the client — it
-  simply roams to another node/band. 5Ghost marks mesh duplicates so you can tell.
-- **2.4 GHz handshakes**: the RTL8720DN can't reliably hear a client's 2.4 GHz uplink, so
-  handshake capture runs on **5 GHz**.
-- **PMF (802.11w)** APs are deauth-immune by design — 5Ghost flags them (`PMF!`) rather than
-  pretending the attack will work.
+- **5 GHz does the heavy lifting** (handshakes, scanning) — the RTL8720DN hears what 2.4 GHz-only ESP32 tools can't.
+- **Mesh & PMF aware** — flags 802.11w (deauth-immune) APs and same-SSID mesh nodes so you don't waste time on dead ends.
 
 ## Legal
 
-5Ghost WiFi Lab is for **authorized security testing and education only**. Only test networks
-and devices you **own** or have **explicit written permission** to test. Unauthorized access to,
-or disruption of, networks is illegal in most jurisdictions. You are solely responsible for
-complying with all applicable laws and radio regulations (e.g. **FCC Part 15** in the US —
-operating an intentional radiator may require authorization). This tool is provided **as-is,
-with no warranty**, and the authors **accept no liability** for misuse or damage.
+For **authorized testing and education only**. Only test networks and devices you **own** or have **explicit permission** to test. You are responsible for complying with all applicable laws and radio regulations (e.g. **FCC Part 15** in the US). Provided **as-is, with no warranty**.
 
-## Credits & License
+## License & credits
 
-Built on MIT-licensed open source. The Flipper FAP is distributed under the **MIT License**
-(see [LICENSE](LICENSE)); full third-party attributions are in [NOTICE.md](NOTICE.md). The
-`.fap` is shipped as a compiled binary; its source is not published.
+The Flipper app is distributed under the **MIT License** (see [LICENSE](LICENSE)) as a compiled `.fap`; third-party attributions are in [NOTICE.md](NOTICE.md).
 
-— by **PINGEQUA** · [pingequa.com](https://pingequa.com)
+— **PINGEQUA** · [pingequa.com](https://pingequa.com)
