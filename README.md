@@ -39,7 +39,7 @@ Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**.
 | Version | Best for |
 |---|---|
 | **[Onboard antenna →](https://www.pingequa.com/products/flipper-zero-5g-wifi-module)** | Compact and pocket-friendly — the PCB antenna keeps the same footprint as the Flipper. |
-| **[8 dBi external antenna →](https://www.pingequa.com/products/flipper-zero-dual-band-5ghz-2-4ghz-wifi-devboard-preloaded-firmware-rtl8720dn-bw16-gpio-module-with-high-gain-8dbi-external-antenna-long-range-iot-network-analysis-packet-monitor-tool)** | Range — a high-gain dual-band antenna for long-range survey and capture. |
+| **[8 dBi external antenna →](https://www.pingequa.com/products/flipper-zero-5ghost-antenna)** | Range — a high-gain dual-band antenna for long-range survey and capture. |
 
 > ⚠️ **Built for the PINGEQUA board.** Other BW16 / RTL8720DN boards ship different firmware, pinouts, and antennas — they are **not supported** and may not work.
 
