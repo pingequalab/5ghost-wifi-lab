@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2.1.1] — 2026-05-29
+
+> Brand-polish follow-up to v2.1. API 87.1, still compatible with Official · Momentum · Unleashed.
+
 ### Added
 - **Startup splash screen**: the app now opens on a dedicated `PINGEQUA Lab` splash instead of
   blocking invisibly on the HELLO probe. A separate timer drives a short progress bar and retries
