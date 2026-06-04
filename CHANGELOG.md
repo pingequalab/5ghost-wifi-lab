@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [2.1.2] — 2026-06-04
+
+> Compatibility fix. The 2.1.1 binary imported the firmware-provided icon
+> `I_WarningDolphin_45x42`, which is not resolvable on every firmware build —
+> on some Unleashed builds it failed to load with a "Missing imports" error.
+> This release is rebuilt against the official Flipper SDK (API 87.1), which
+> bundles that icon into the `.fap` itself, so the app is now self-contained
+> and loads cleanly on Official · Momentum · Unleashed. No feature changes.
+
+### Fixed
+- **"Missing imports" on launch (firmware-dependent).** The error-popup warning
+  icon is now baked into the `.fap` instead of being imported from firmware, so
+  the app no longer depends on a given firmware exposing `I_WarningDolphin_45x42`.
+
 ## [2.1.1] — 2026-05-29
 
 > Brand-polish follow-up to v2.1. API 87.1, still compatible with Official · Momentum · Unleashed.
