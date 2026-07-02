@@ -2,6 +2,55 @@
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-07-02
+
+> Major update: a new BLE reconnaissance suite (Flipper / Find My tracker detection +
+> a general BLE scanner), a from-scratch BW16 firmware (fw 2.3.0), and the P3–P5
+> features (dual-band scan, handshake capture, Evil Portal) promoted from
+> compile-verified to on-device-verified. API 87.1, still loads on Official · Momentum
+> · Unleashed.
+>
+> ⚠️ **Reflash the BW16 to firmware 2.3.0 (caps `DSEBHL`)** to use BLE and dual-band
+> scan — the recovery image on `fw.pingequa.com` / the flasher is updated to 2.3.0. The
+> BLE menu stays hidden on older firmware that doesn't report the `L` capability.
+
+### Added
+- **BLE reconnaissance** — new `BLE Scan` menu (shown when the module reports the `L`
+  capability), a passive BLE central sweep that lists every advertising device:
+  - **General BLE scanner**: MAC, RSSI, advertised name and vendor per device;
+    de-duplicated; CSV export to `/ext/apps_data/5ghost/ble_<timestamp>.csv`.
+  - **Flipper Zero detection**: flags nearby Flipper Zeros — a bare Flipper can't scan
+    BLE natively, so this needs the BW16. By MAC OUI (`0C:FA:22`, `80:E1:26/27`) + name.
+  - **Find My tracker detection**: flags Apple Find My devices (AirTag etc.) by
+    manufacturer id `0x004C` + offline-finding type byte — an anti-stalking aid.
+  - **Vendor identification**: manufacturer company-id → vendor name (Apple, Samsung,
+    Google, Microsoft, Tile, …) from the Bluetooth SIG registry, so an unnamed device
+    reads as e.g. `~Apple` instead of a raw MAC.
+  - **Per-device detail page** (kind / MAC / RSSI / vendor) and a **detection alert
+    chip**: the header hides the Flipper/tracker counters while zero and shows an
+    inverted `!Flip N` / `!Track N` chip the moment one is seen.
+- **About page 4 — Firmware / Version**: shows the module's reported firmware version
+  and capability bits.
+
+### Changed
+- **New BW16 firmware, fw 2.3.0 (caps `DSEBHL`)** — a ground-up rewrite that revives
+  2.4 GHz scanning (dual-band 2.4/5 GHz verified on device) and adds BLE (`L`). **The
+  BW16 must be reflashed**; the recovery image is updated to 2.3.0.
+- **Main menu reordered (recon-first)**: Scan Wi-Fi → BLE Scan → Channel Map →
+  Capture Handshake → Send Beacon → Create AP → About.
+- **P3–P5 promoted to on-device-verified**: dual-band passive scan, WPA handshake
+  capture (full M1–M4 on 5 GHz), and Evil Portal (iOS captive auto-open) — previously
+  compile-verified — are now validated end-to-end on real hardware.
+- **Startup splash redesigned**: a pixel-perfect brand splash rendered with a pixel
+  font (no more scaled-vector aliasing).
+- Internal `DelfyRTL` fork naming cleaned up to `ghost5` (no user-facing change).
+
+### Fixed
+- **BLE Scan crash on entry**: three scene-handler arrays were missing the new BLE
+  scenes, so opening BLE Scan indexed past the array and hard-faulted the Flipper.
+- **BEACON hard-fault**: `strrchr()` is unusable on the AmebaD newlib and crashed the
+  beacon path; replaced with a hand-rolled reverse scan.
+
 ## [2.1.2] — 2026-06-04
 
 > Compatibility fix. The 2.1.1 binary imported the firmware-provided icon

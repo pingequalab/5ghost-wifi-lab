@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.1.1" src="https://img.shields.io/badge/app-v2.1.1-555">
+  <img alt="Version 2.2.0" src="https://img.shields.io/badge/app-v2.2.0-555">
 </p>
 
 <p align="center">
@@ -28,6 +28,7 @@ Almost every Flipper Wi-Fi tool is **2.4 GHz only** — the popular ESP32-based 
 - 🛰️ **Real 5 GHz.** Scan, capture handshakes, and map congestion on the 5 GHz band that 2.4-only tools simply can't see.
 - 🛡️ **PMF / WPA3-aware.** It flags 802.11w (Protected Management Frames) and WPA3 APs — the ones that *ignore* deauth — so you stop wasting time on dead ends. Almost no other tool surfaces this.
 - 🤝 **Handshakes that land.** On-device WPA/WPA2 4-way handshake straight to a standard PCAP — verified on real hardware, crackable in hashcat / aircrack-ng.
+- 📻 **BLE recon, too.** Scan Bluetooth LE to flag **AirTag / Find My trackers** and **nearby Flipper Zeros**, and identify device vendors — a bare Flipper can't scan BLE, the BW16 can.
 - 🎛️ **One clean app.** Purpose-built UI for the 128×64 screen, not a wall of serial commands — and one build runs on all three major firmwares.
 
 ---
@@ -50,6 +51,7 @@ Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**.
 | | Feature | What it does |
 |---|---|---|
 | 📡 | **Dual-band scan** | Lists 2.4 **and 5 GHz** APs with signal, encryption, **precise PMF** (capable / required), **WPA3 detection**, and same-SSID mesh markers. |
+| 📻 | **BLE Scan** | Passive Bluetooth LE sweep — lists every advertising device with RSSI + **vendor**, flags **AirTag / Find My trackers** and **nearby Flipper Zeros**, with a per-device detail page + CSV export. |
 | 📊 | **Channel Map** | Congestion view across both bands with the least-busy channel highlighted — pick a clear channel, or find where the targets are. |
 | 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake on **5 GHz**, written as a standard PCAP to the SD card. Drop it straight into hashcat (22000) or aircrack-ng. |
 | 🪤 | **Evil Portal** | Captive-portal credential capture — built-in pages, **a few bundled demo portals**, or **load your own HTML** from the SD card. Auto-opens on iOS. |
@@ -64,6 +66,7 @@ Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**.
 The things 5Ghost does that most Flipper Wi-Fi tools don't:
 
 - **Real dual-band on one board.** 5 GHz isn't a checkbox — scan, Channel Map, handshake capture, and deauth all work on 5 GHz, not just 2.4.
+- **BLE recon a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists every advertiser, flags Find My trackers (AirTag etc.) and other Flipper Zeros, and names vendors — offline, with a header alert chip the moment a tracker or Flipper appears.
 - **PMF / WPA3 awareness.** By parsing each beacon's RSN IE, it labels WPA3-SAE and 802.11w-required APs as **deauth-immune** up front — so you don't burn time attacking something that ignores you. Most tools just fail silently.
 - **A 5 GHz handshake path that works.** On 2.4 GHz this chip often can't hear the client's uplink (M2/M4); 5Ghost routes handshake capture through 5 GHz where it reliably does — turning a flaky feature into one that lands.
 - **One build, three firmwares.** A single `.fap` runs on Official, Momentum, and Unleashed (it avoids the APIs the official firmware disables, so it loads cleanly everywhere).
@@ -79,6 +82,8 @@ The things 5Ghost does that most Flipper Wi-Fi tools don't:
 | ![Home menu — firmware status + tools](assets/screenshots/home.png) | ![Scan list — lock, SSID, RSSI, mesh markers](assets/screenshots/scan-list.png) |
 | **AP detail** | **Channel Map** |
 | ![AP detail — encryption, channel, band, MAC + actions](assets/screenshots/ap-detail.png) | ![Channel Map — band congestion + best channel](assets/screenshots/channel-map.png) |
+| **BLE Scan** | **BLE detail** |
+| ![BLE scan — devices with vendor names and a tracker alert chip](assets/screenshots/ble-scan.png) | ![BLE device detail — kind, MAC, RSSI, vendor](assets/screenshots/ble-detail.png) |
 
 ---
 
@@ -87,6 +92,7 @@ The things 5Ghost does that most Flipper Wi-Fi tools don't:
 |  | **5Ghost WiFi Lab** | 2.4 GHz tools<br>(ESP32 / Marauder-class) | Other BW16 firmware |
 |---|:---:|:---:|:---:|
 | **5 GHz** scan + attack | ✅ | ❌ *(no 5 GHz radio)* | partial |
+| **BLE scan** — trackers / Flippers | ✅ | varies *(AirTag mode on some)* | rare |
 | Handshake → **PCAP on device** | ✅ verified | varies | limited / standalone |
 | **PMF / 802.11w + WPA3** awareness | ✅ | ❌ | ❌ |
 | Evil Portal + **custom HTML** | ✅ | varies | rare |
