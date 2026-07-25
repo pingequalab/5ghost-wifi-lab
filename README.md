@@ -39,8 +39,8 @@ Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**.
 
 | Version | Best for |
 |---|---|
-| **[Onboard antenna →](https://www.pingequa.com/products/flipper-zero-5g-wifi-module)** | Compact and pocket-friendly — the PCB antenna keeps the same footprint as the Flipper. |
-| **[8 dBi external antenna →](https://www.pingequa.com/products/flipper-zero-5ghost-antenna)** | Range — a high-gain dual-band antenna for long-range survey and capture. |
+| **[Onboard antenna →](https://www.pingequa.com/products/flipper-zero-5g-wifi-module?utm_source=github&utm_medium=readme&utm_campaign=5ghost)** | Compact and pocket-friendly — the PCB antenna keeps the same footprint as the Flipper. |
+| **[8 dBi external antenna →](https://www.pingequa.com/products/flipper-zero-5ghost-antenna?utm_source=github&utm_medium=readme&utm_campaign=5ghost)** | Range — a high-gain dual-band antenna for long-range survey and capture. |
 
 > ⚠️ **Built for the PINGEQUA board.** Other BW16 / RTL8720DN boards ship different firmware, pinouts, and antennas — they are **not supported** and may not work.
 
@@ -71,7 +71,7 @@ The things 5Ghost does that most Flipper Wi-Fi tools don't:
 - **A 5 GHz handshake path that works.** On 2.4 GHz this chip often can't hear the client's uplink (M2/M4); 5Ghost routes handshake capture through 5 GHz where it reliably does — turning a flaky feature into one that lands.
 - **One build, three firmwares.** A single `.fap` runs on Official, Momentum, and Unleashed (it avoids the APIs the official firmware disables, so it loads cleanly everywhere).
 - **An Evil Portal that ships ready.** Custom HTML from the SD card, plus a few playful demo portals **bundled into the app** — they appear on the card automatically, nothing to copy.
-- **Browser-based recovery.** If the module firmware ever gets corrupted, it can be re-flashed from the browser over USB — no toolchain to install. (See [pingequa.com](https://pingequa.com).)
+- **Browser-based recovery.** If the module firmware ever gets corrupted, it can be re-flashed from the browser over USB — no toolchain to install. (See [pingequa.com](https://pingequa.com?utm_source=github&utm_medium=readme&utm_campaign=5ghost).)
 
 ---
 
@@ -144,5 +144,5 @@ For **authorized testing and education only.** Only test networks and devices yo
 The Flipper app is distributed as a compiled `.fap` under the **MIT License** (see [LICENSE](LICENSE)). Third-party attributions are in [NOTICE.md](NOTICE.md).
 
 <p align="center">
-  <sub><strong>PINGEQUA</strong> · <a href="https://pingequa.com">pingequa.com</a></sub>
+  <sub><strong>PINGEQUA</strong> · <a href="https://pingequa.com?utm_source=github&utm_medium=readme&utm_campaign=5ghost">pingequa.com</a></sub>
 </p>
