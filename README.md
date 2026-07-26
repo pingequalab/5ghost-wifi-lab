@@ -1,48 +1,53 @@
 <h1 align="center">5Ghost WiFi Lab</h1>
 
 <p align="center">
-  <strong>Dual-band 2.4 + 5 GHz Wi-Fi recon &amp; security testing for Flipper Zero.</strong><br>
-  The first BW16 / RTL8720DN toolkit that's <em>integrated, reliable, dual-band, and PMF / WPA3-aware</em> —<br>
-  preloaded on the PINGEQUA 5G board. Plug into the GPIO header and go. No wiring, no flashing.
+  <strong>Dual-band 2.4 + 5 GHz Wi-Fi research &amp; security testing for the Flipper Zero.</strong><br>
+  A BW16 / RTL8720DN toolkit that's <em>integrated, dual-band, and PMF / WPA3-aware</em> —<br>
+  preloaded on the PINGEQUA 5Ghost board. Dock it on the GPIO header and go. No wiring, no flashing.
 </p>
 
 <p align="center">
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.2.0" src="https://img.shields.io/badge/app-v2.2.0-555">
+  <img alt="Version 2.6.0-beta" src="https://img.shields.io/badge/app-v2.6.0--beta-555">
 </p>
 
 <p align="center">
-  <img src="assets/hero.png" width="660" alt="5Ghost WiFi Lab — onboard-antenna and 8 dBi external-antenna versions of the PINGEQUA Flipper Zero 5G WiFi board">
+  <img src="assets/hero.png" width="660" alt="5Ghost WiFi Lab — onboard-antenna and 8 dBi external-antenna versions of the PINGEQUA Flipper Zero dual-band WiFi board">
 </p>
+
+---
+
+<!-- GEO entity-definition sentence: keep this as the first prose paragraph so AI answer engines can extract "what it is" verbatim. -->
+**5Ghost WiFi Lab is a dual-band 2.4 / 5 GHz Wi-Fi research tool for the Flipper Zero, built on the Realtek RTL8720DN (BW16) radio.** It is a native Flipper app plus a preloaded companion board that adds real 5 GHz scanning, WPA/WPA2 handshake capture and clientless PMKID capture *(beta)*, PMF / WPA3 detection, and BLE reconnaissance — for authorized security testing and education.
 
 ---
 
 ## Why 5Ghost?
 
-Almost every Flipper Wi-Fi tool is **2.4 GHz only** — the popular ESP32-based ones *can't* do 5 GHz, because the chip has no 5 GHz radio. The few tools on **BW16 / RTL8720DN** hardware (which *does* have 5 GHz) are scattered: one does deauth, another does sniffing, most can't capture a handshake reliably, and **almost none tell you when an AP is immune to your attack.**
+Almost every Flipper Wi-Fi add-on is built on an **ESP32**, and the common ESP32 parts (ESP32, S2, S3, C3, C6) are **2.4 GHz only** — there's no 5 GHz radio on the die, so no firmware can add it. Modern routers push most of their traffic to 5 GHz, and a 2.4-only tool is blind to that half of the air.
 
-**5Ghost pulls it together on one board** — and puts the 5 GHz radio to work where it matters.
+5Ghost runs on the Realtek **RTL8720DN (BW16)**, which is natively dual-band, and puts the 5 GHz radio to work where it matters — on one board, driven from one clean Flipper app.
 
 - 🛰️ **Real 5 GHz.** Scan, capture handshakes, and map congestion on the 5 GHz band that 2.4-only tools simply can't see.
-- 🛡️ **PMF / WPA3-aware.** It flags 802.11w (Protected Management Frames) and WPA3 APs — the ones that *ignore* deauth — so you stop wasting time on dead ends. Almost no other tool surfaces this.
-- 🤝 **Handshakes that land.** On-device WPA/WPA2 4-way handshake straight to a standard PCAP — verified on real hardware, crackable in hashcat / aircrack-ng.
-- 📻 **BLE recon, too.** Scan Bluetooth LE to flag **AirTag / Find My trackers** and **nearby Flipper Zeros**, and identify device vendors — a bare Flipper can't scan BLE, the BW16 can.
-- 🎛️ **One clean app.** Purpose-built UI for the 128×64 screen, not a wall of serial commands — and one build runs on all three major firmwares.
+- 🛡️ **PMF / WPA3-aware.** It flags 802.11w (Protected Management Frames) and WPA3 APs — the ones that *ignore* deauth — so you stop wasting time on dead ends.
+- 🤝 **Captures that land.** On-device WPA/WPA2 4-way handshake and **clientless PMKID** *(beta)* straight to standard hashcat-ready files on the SD card.
+- 📻 **BLE recon a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists advertisers, flags Find My / AirTag trackers and nearby Flipper Zeros, and names vendors.
+- 🎛️ **One clean app, three firmwares.** Purpose-built UI for the 128×64 screen, and one build runs on Official, Momentum, and Unleashed.
 
 ---
 
-## 🛒 Get the board — two versions
+## 🛒 Get the board
 
-Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**. Dock it on the Flipper GPIO header — no wiring, no flashing.
+The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-5ghost-bw16-external-antenna)** is a dual-band RTL8720DN (BW16) board, **preloaded with 5Ghost firmware**. Dock it on the Flipper GPIO header — no wiring, no flashing. Two antenna options:
 
-| Version | Best for |
+| Variant | Best for |
 |---|---|
-| **[Onboard antenna →](https://www.pingequa.com/products/flipper-zero-5g-wifi-module?utm_source=github&utm_medium=readme&utm_campaign=5ghost)** | Compact and pocket-friendly — the PCB antenna keeps the same footprint as the Flipper. |
-| **[8 dBi external antenna →](https://www.pingequa.com/products/flipper-zero-5ghost-antenna?utm_source=github&utm_medium=readme&utm_campaign=5ghost)** | Range — a high-gain dual-band antenna for long-range survey and capture. |
+| **Onboard antenna** | Compact and pocket-friendly — the PCB antenna keeps the same footprint as the Flipper. |
+| **8 dBi external antenna** | Range — a high-gain dual-band antenna for long-range survey and capture. |
 
-> ⚠️ **Built for the PINGEQUA board.** Other BW16 / RTL8720DN boards ship different firmware, pinouts, and antennas — they are **not supported** and may not work.
+> ⚠️ **Designed for the PINGEQUA 5Ghost board.** Other BW16 / RTL8720DN boards ship different firmware, pinouts, and antennas — they are **not supported** and may not work.
 
 ---
 
@@ -51,27 +56,26 @@ Both are the same dual-band RTL8720DN board, **preloaded with 5Ghost firmware**.
 | | Feature | What it does |
 |---|---|---|
 | 📡 | **Dual-band scan** | Lists 2.4 **and 5 GHz** APs with signal, encryption, **precise PMF** (capable / required), **WPA3 detection**, and same-SSID mesh markers. |
-| 📻 | **BLE Scan** | Passive Bluetooth LE sweep — lists every advertising device with RSSI + **vendor**, flags **AirTag / Find My trackers** and **nearby Flipper Zeros**, with a per-device detail page + CSV export. |
 | 📊 | **Channel Map** | Congestion view across both bands with the least-busy channel highlighted — pick a clear channel, or find where the targets are. |
-| 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake on **5 GHz**, written as a standard PCAP to the SD card. Drop it straight into hashcat (22000) or aircrack-ng. |
-| 🪤 | **Evil Portal** | Captive-portal credential capture — built-in pages, **a few bundled demo portals**, or **load your own HTML** from the SD card. Auto-opens on iOS. |
-| 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz, and it tells you when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. Hits every same-SSID mesh node in one pass. |
-| 📶 | **Create AP · Send Beacon** | Stand up a real joinable soft AP (with the captive portal), or flood custom / random / Rickroll beacons. |
-| 💾 | **Everything to SD** | Scans (CSV), captured credentials, and handshakes (PCAP) all save to `/ext/apps_data/5ghost/`, with on-screen save confirmation. |
+| 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake, routed over **5 GHz** where it lands, written as a standard PCAP to the SD card. Drop it into hashcat (22000) or aircrack-ng. |
+| 🎯 | **Clientless PMKID** *(beta)* | Captures a WPA/WPA2 **PMKID** via AUTHPROBE association — no client needed. On-device target picker across 2.4 + 5 GHz, a capture-quality gate, and export to `.22000` (hashcat mode 22000) + a `.json` record. |
+| 👥 | **Station recon** | Lists clients associated to a chosen AP, then targeted **deauth** and focused handshake capture on that client (2.4 + 5 GHz). |
+| 📻 | **BLE Scan** | Passive BLE sweep with multi-round accumulation and cross-scan de-dup — lists advertisers with RSSI + **vendor**, flags **Find My / AirTag trackers** and **nearby Flipper Zeros**, per-device detail + CSV export. |
+| 🪤 | **Evil Portal** | Captive-portal page for authorized testing — built-in pages, bundled demo portals, or **load your own HTML** from the SD card. Auto-opens on iOS. |
+| 📶 | **Create AP · Multi-SSID Beacon** | Stand up a real joinable soft AP, or emit multiple named / multi-BSSID beacons for lab work and detector testing. |
+| 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. Hits every same-SSID mesh node in one pass. |
+| 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), and BLE lists save under `/ext/apps_data/5ghost/` with an atomic write + on-screen save confirmation. |
 
 ---
 
 ## What makes it different
 
-The things 5Ghost does that most Flipper Wi-Fi tools don't:
-
-- **Real dual-band on one board.** 5 GHz isn't a checkbox — scan, Channel Map, handshake capture, and deauth all work on 5 GHz, not just 2.4.
-- **BLE recon a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists every advertiser, flags Find My trackers (AirTag etc.) and other Flipper Zeros, and names vendors — offline, with a header alert chip the moment a tracker or Flipper appears.
-- **PMF / WPA3 awareness.** By parsing each beacon's RSN IE, it labels WPA3-SAE and 802.11w-required APs as **deauth-immune** up front — so you don't burn time attacking something that ignores you. Most tools just fail silently.
-- **A 5 GHz handshake path that works.** On 2.4 GHz this chip often can't hear the client's uplink (M2/M4); 5Ghost routes handshake capture through 5 GHz where it reliably does — turning a flaky feature into one that lands.
+- **Real dual-band on one board.** 5 GHz isn't a checkbox — scan, Channel Map, handshake, PMKID *(beta)*, and deauth all work on 5 GHz, not just 2.4.
+- **PMF / WPA3 awareness.** By parsing each beacon's RSN IE, it labels WPA3-SAE and 802.11w-required APs as **deauth-immune** up front — so you don't burn time attacking something that ignores you.
+- **Clientless PMKID** *(beta).* Grabs a crackable PMKID via AUTHPROBE without waiting for a client to connect — with an on-device capture-quality gate before it claims success.
+- **BLE recon a bare Flipper can't do.** Flipper's official firmware never exposes a general BLE scanner to apps ([issue #2906](https://github.com/flipperdevices/flipperzero-firmware/issues/2906), closed unimplemented); the BW16 lists every advertiser, flags Find My trackers and other Flipper Zeros, and names vendors.
 - **One build, three firmwares.** A single `.fap` runs on Official, Momentum, and Unleashed (it avoids the APIs the official firmware disables, so it loads cleanly everywhere).
-- **An Evil Portal that ships ready.** Custom HTML from the SD card, plus a few playful demo portals **bundled into the app** — they appear on the card automatically, nothing to copy.
-- **Browser-based recovery.** If the module firmware ever gets corrupted, it can be re-flashed from the browser over USB — no toolchain to install. (See [pingequa.com](https://pingequa.com?utm_source=github&utm_medium=readme&utm_campaign=5ghost).)
+- **Browser-based recovery.** If the module firmware ever gets corrupted, it re-flashes from a desktop Chromium/Firefox browser over USB — no toolchain to install. See [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
 ---
 
@@ -82,24 +86,36 @@ The things 5Ghost does that most Flipper Wi-Fi tools don't:
 | ![Home menu — firmware status + tools](assets/screenshots/home.png) | ![Scan list — lock, SSID, RSSI, mesh markers](assets/screenshots/scan-list.png) |
 | **AP detail** | **Channel Map** |
 | ![AP detail — encryption, channel, band, MAC + actions](assets/screenshots/ap-detail.png) | ![Channel Map — band congestion + best channel](assets/screenshots/channel-map.png) |
-| **BLE Scan** | **BLE detail** |
+| **BLE scan** | **BLE detail** |
 | ![BLE scan — devices with vendor names and a tracker alert chip](assets/screenshots/ble-scan.png) | ![BLE device detail — kind, MAC, RSSI, vendor](assets/screenshots/ble-detail.png) |
 
 ---
 
 ## How it compares
 
-|  | **5Ghost WiFi Lab** | 2.4 GHz tools<br>(ESP32 / Marauder-class) | Other BW16 firmware |
-|---|:---:|:---:|:---:|
-| **5 GHz** scan + attack | ✅ | ❌ *(no 5 GHz radio)* | partial |
-| **BLE scan** — trackers / Flippers | ✅ | varies *(AirTag mode on some)* | rare |
-| Handshake → **PCAP on device** | ✅ verified | varies | limited / standalone |
-| **PMF / 802.11w + WPA3** awareness | ✅ | ❌ | ❌ |
-| Evil Portal + **custom HTML** | ✅ | varies | rare |
-| Native **Flipper app** UI | ✅ | ✅ | often serial / Web UI only |
-| **One build** for 3 firmwares | ✅ | — | varies |
+5Ghost is a **preloaded board + native Flipper app**; the three tools below are **firmwares** you flash onto ESP32 hardware you supply. All are for authorized testing, and all are legitimate projects with active communities. Capabilities evolve fast — versions and sources are dated so you can re-check.
 
-The 5 GHz radio + PMF/WPA3 awareness + a reliable on-device handshake path is the combination no single tool offered before. *(Capabilities of other projects vary by version — check their docs.)*
+| Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
+|---|:---:|:---:|:---:|:---:|
+| Latest version *(2026-07)* | 2.6.0-beta | v1.14.0 | 1.16 | v2.0 |
+| Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
+| **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
+| 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
+| Handshake → PCAP | ✅ *(5 GHz routed)* | ✅ | ✅ | ✅ |
+| **Clientless** PMKID *(self-associate)* | ✅ beta ² | — passive / deauth ² | — none ² | — passive ² |
+| PMF / WPA3 deauth-immunity flagged | ✅ | — | — | ✅ *(on C5 / C6)* |
+| BLE scan + tracker / Flipper detect | ✅ | ✅ | ✅ | ✅ |
+| Native Flipper app | ✅ purpose-built | via companion FAP | — standalone (M5 / CYD) | ✅ companion app |
+| Ships preloaded, no flashing | ✅ | — | — | — |
+| License | app MIT · fw closed | MIT | AGPL-3.0 | GPL-3.0 |
+
+¹ **The 5 GHz reality (2026).** The classic ESP32 / S2 / S3 / C3 / C6 have no 5 GHz radio, so on that hardware Marauder, Bruce and GhostESP are 2.4 GHz only. Since Espressif's dual-band **ESP32-C5** (Wi-Fi 6, 2024), these firmwares can reach 5 GHz **on C5 boards** — GhostESP documents C5 5 GHz scan + deauth, and Marauder runs on C5 modules like Apex 5 — but 5 GHz *attacks* are early, with deauth crashes / no-ops tracked in their own issue trackers. There are also add-on RTL8720DN modules (e.g. Double Barrel 5G) that reach 5 GHz with the **same chip 5Ghost uses**. **5 GHz is no longer unique to any one tool** — 5Ghost's focus is 5 GHz link *reliability* + PMF awareness on native dual-band hardware, not chip exclusivity.
+
+² **PMKID nuance.** Marauder and GhostESP *can* obtain a PMKID, but by passive sniffing or by deauthing an existing client — not by self-associating to the AP; Bruce has no dedicated PMKID feature. 5Ghost's **clientless** PMKID actively associates (AUTHPROBE) to elicit the AP's PMKID with no client present. It is marked **beta**.
+
+**Baselines.** A **bare Flipper Zero** has no Wi-Fi radio at all (Wi-Fi needs an add-on board), and its official firmware doesn't expose a general BLE scanner to apps. The official **Flipper Wi-Fi Dev Board** is an **ESP32-S2** (2.4 GHz only) that ships as a wireless debugger and runs Marauder only after you flash it.
+
+**Sources** *(accessed 2026-07-26):* ESP32 Marauder [v1.14.0](https://github.com/justcallmekoko/ESP32Marauder/releases) (MIT) · Bruce [1.16](https://github.com/BruceDevices/firmware/releases) (AGPL-3.0) · GhostESP [v2.0](https://github.com/GhostESP-Revival/GhostESP/releases) (GPL-3.0), [C5 5 GHz docs](https://docs.ghostesp.net/latest/wifi/deauth/) · ESP32-C5 dual-band [Espressif](https://www.espressif.com/en/products/socs/esp32-c5) · Double Barrel 5G / RTL8720DN [HoneyHoneyTeam](https://github.com/HoneyHoneyTeam) · Flipper Wi-Fi Dev Board (ESP32-S2) [developer.flipper.net](https://developer.flipper.net/flipperzero/doxygen/dev_board.html) · Flipper BLE-scanner limitation [issue #2906](https://github.com/flipperdevices/flipperzero-firmware/issues/2906).
 
 ---
 
@@ -107,19 +123,46 @@ The 5 GHz radio + PMF/WPA3 awareness + a reliable on-device handshake path is th
 
 Tools that overpromise waste your time. The straight talk:
 
-- **WPA3-SAE can't be cracked offline — by any tool.** SAE (Dragonfly) is designed so a captured handshake has no offline-crackable hash; this is a protocol-level guarantee, not a 5Ghost limitation. No firmware or hardware breaks pure WPA3-SAE offline. 5Ghost **detects** WPA3 and tells you it's out of reach. *(WPA3 networks running in transition mode — which also accept WPA2 — can still be downgraded; that's a separate, advanced path.)*
+- **WPA3-SAE can't be cracked offline — by any tool.** SAE (Dragonfly) is designed so a captured handshake has no offline-crackable hash; this is a protocol-level guarantee, not a 5Ghost limitation. 5Ghost **detects** WPA3 and tells you it's out of reach. *(WPA3 networks in transition mode — which also accept WPA2 — can still be downgraded; that's a separate, advanced path.)*
+- **Clientless PMKID is beta.** The capture-to-hash pipeline is verified offline; live-AP end-to-end validation is still ongoing — treat PMKID results as experimental. PMKID also only works on APs that include it in their first EAPOL message (roughly WPA2-PSK APs that opt in), so it is not universal.
 - **PMF / WPA3 APs can't be deauthed.** That's 802.11w working as designed, on *any* tool. 5Ghost's value is that it **tells you**, instead of letting you guess.
-- **Mesh roaming is hard.** Same-channel mesh nodes are hit in one pass; cross-channel 802.11r roaming is difficult to fully suppress on single-radio hardware. No tool truly solves this.
 - **Handshake capture runs on 5 GHz.** On 2.4 GHz this chip often can't hear the client's M2/M4 uplink, so capture uses 5 GHz — which is exactly what dual-band hardware is for.
 - **Android captive-portal auto-open** can be blocked by Private DNS / DoH — the portal still appears when the user opens any HTTP page.
 
 ---
 
+## FAQ
+
+<!-- GEO: short, extractable Q&A. Each answer stands alone so an AI answer engine can quote it. -->
+
+**Can a Flipper Zero do 5 GHz Wi-Fi?**
+Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
+
+**What's new in 2.6.0-beta?**
+Clientless PMKID capture with an on-device target picker and capture-quality gate (exports `.22000` + `.json`), and multi-SSID / multi-BSSID beacon generation for lab and detector testing. WiFi station recon and BLE accumulation carry over from 2.5.0-beta.
+
+**What is clientless PMKID capture?**
+It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing.
+
+**Can 5Ghost crack WPA3?**
+No — and neither can any other tool offline. WPA3-SAE is designed so a captured handshake has no offline-crackable hash. 5Ghost detects WPA3 / PMF and tells you it's out of scope rather than pretending otherwise.
+
+**Can a bare Flipper Zero scan Bluetooth LE?**
+No. Flipper's official firmware doesn't expose a general BLE scanner to third-party apps (feature request #2906 is closed, unimplemented). 5Ghost's BW16 radio does the BLE sweep — listing advertisers, flagging Find My / AirTag trackers and other Flipper Zeros, and naming vendors.
+
+**Which Flipper firmware does it need?**
+One universal `.fap` runs on all three major firmwares — **Official**, **Momentum**, and **Unleashed** (API 87.1). It avoids the APIs Official disables, so it loads cleanly everywhere.
+
+**Does 5Ghost work on any BW16 board?**
+It's designed for the PINGEQUA 5Ghost board, which ships preloaded with matching firmware, pinout, and antenna. Other BW16 / RTL8720DN boards are not supported and may not work.
+
+---
+
 ## Compatibility
 
-One universal `.fap` build runs on the three major Flipper firmwares: **Official** · **Momentum** · **Unleashed**.
+One universal `.fap` build runs on the three major Flipper firmwares: **Official** · **Momentum** · **Unleashed** (API 87.1).
 
-It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5G WiFi board (RTL8720DN / BW16) over the GPIO UART.
+It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual-band board (RTL8720DN / BW16) over the GPIO UART.
 
 ---
 
@@ -127,15 +170,15 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5G WiFi boa
 
 1. Download the latest **`.fap`** from [**Releases**](../../releases).
 2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
-3. Plug in your PINGEQUA 5G board and open **Apps → GPIO → 5Ghost WiFi Lab**.
+3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
-The board ships **preloaded** — there's nothing to flash.
+The board ships **preloaded** — there's nothing to flash. Need to recover a board? Use the browser flasher at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
 ---
 
 ## Legal
 
-For **authorized testing and education only.** Only test networks and devices you **own** or have **explicit written permission** to test. You are responsible for complying with all applicable laws and radio regulations (e.g. **FCC Part 15** in the US). Provided **as-is, with no warranty.**
+For **authorized testing and education only.** Only test networks and devices you **own** or have **explicit written permission** to test. You are responsible for complying with all applicable laws and radio regulations (e.g. **FCC Part 15** in the US). "Flipper Zero", "ESP32", "ESP32 Marauder", "Bruce", "GhostESP" and other names are referenced for compatibility and comparison only; PINGEQUA is independent and not affiliated with or endorsed by their respective owners. Provided **as-is, with no warranty.**
 
 ---
 
@@ -144,5 +187,5 @@ For **authorized testing and education only.** Only test networks and devices yo
 The Flipper app is distributed as a compiled `.fap` under the **MIT License** (see [LICENSE](LICENSE)). Third-party attributions are in [NOTICE.md](NOTICE.md).
 
 <p align="center">
-  <sub><strong>PINGEQUA</strong> · <a href="https://pingequa.com?utm_source=github&utm_medium=readme&utm_campaign=5ghost">pingequa.com</a></sub>
+  <sub><strong>PINGEQUA</strong> · <a href="https://pingequa.com">pingequa.com</a></sub>
 </p>
