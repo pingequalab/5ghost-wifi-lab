@@ -2,6 +2,41 @@
 
 ## [Unreleased]
 
+## [2.7.0] — 2026-07-30
+
+> BLE reconnaissance & injection expansion, all validated on real hardware: GATT
+> active recon, iBeacon spoofing, BadBLE HID keystroke injection, and tracker
+> detection widened to all four big ecosystems (AirTag, Tile, Samsung SmartTag,
+> Google Find My). Dual-band Wi-Fi, deauth, Evil Portal, handshake and clientless
+> PMKID capture are unchanged. API 87.1, still loads on Official · Momentum ·
+> Unleashed.
+
+### Added
+- **GATT reconnaissance** — from a scanned device's detail page, actively connect,
+  enumerate its GATT services, and read the **Device Information** profile
+  (manufacturer / model / firmware) — data a passive scan can't obtain.
+- **iBeacon spoofing** — broadcast a spec-compliant Apple **iBeacon** with a
+  UUID / major / minor you choose, or a built-in demo identity, for a chosen
+  window (30 / 60 / 120 s).
+- **BadBLE HID** — advertise a BLE **keyboard**; once the target pairs, type a
+  keystroke payload — a built-in preset or your own script loaded from the SD
+  card. Manual start / stop / re-send control (BadUSB-style).
+- **Tracker detection expanded to all four big ecosystems** — Find My tracker
+  detection now also flags **Tile**, **Samsung SmartTag**, and **Google Find My
+  Device (FMDN)** alongside Apple AirTag, merged into the main BLE scan.
+
+### Changed
+- **Main menu**: new `iBeacon Spoof` and `BadBLE HID` entries join `BLE Scan` in
+  the recon block.
+
+## [2.6.1] — 2026-07-26
+
+### Fixed
+- **Custom SD portal credentials not appearing on the Flipper or SD card.** New bundled
+  portals now submit to the canonical `/submit` path, while the BW16 firmware accepts
+  legacy `/userinput` pages already stored on customer SD cards. Existing custom pages
+  are preserved and do not need to be edited.
+
 ## [2.2.0] — 2026-07-02
 
 > Major update: a new BLE reconnaissance suite (Flipper / Find My tracker detection +
@@ -10,13 +45,13 @@
 > compile-verified to on-device-verified. API 87.1, still loads on Official · Momentum
 > · Unleashed.
 >
-> ⚠️ **Reflash the BW16 to firmware 2.3.0 (caps `DSEBHL`)** to use BLE and dual-band
+> ⚠️ **Reflash the BW16 to firmware 2.3.0** to use BLE and dual-band
 > scan — the recovery image on `fw.pingequa.com` / the flasher is updated to 2.3.0. The
-> BLE menu stays hidden on older firmware that doesn't report the `L` capability.
+> BLE menu requires this updated firmware.
 
 ### Added
-- **BLE reconnaissance** — new `BLE Scan` menu (shown when the module reports the `L`
-  capability), a passive BLE central sweep that lists every advertising device:
+- **BLE reconnaissance** — new `BLE Scan` menu, a passive BLE central sweep that lists
+  every advertising device:
   - **General BLE scanner**: MAC, RSSI, advertised name and vendor per device;
     de-duplicated; CSV export to `/ext/apps_data/5ghost/ble_<timestamp>.csv`.
   - **Flipper Zero detection**: flags nearby Flipper Zeros — a bare Flipper can't scan
@@ -29,12 +64,11 @@
   - **Per-device detail page** (kind / MAC / RSSI / vendor) and a **detection alert
     chip**: the header hides the Flipper/tracker counters while zero and shows an
     inverted `!Flip N` / `!Track N` chip the moment one is seen.
-- **About page 4 — Firmware / Version**: shows the module's reported firmware version
-  and capability bits.
+- **About page 4 — Firmware / Version**: shows the module's reported firmware version.
 
 ### Changed
-- **New BW16 firmware, fw 2.3.0 (caps `DSEBHL`)** — a ground-up rewrite that revives
-  2.4 GHz scanning (dual-band 2.4/5 GHz verified on device) and adds BLE (`L`). **The
+- **New BW16 firmware, fw 2.3.0** — a ground-up rewrite that revives
+  2.4 GHz scanning (dual-band 2.4/5 GHz verified on device) and adds BLE. **The
   BW16 must be reflashed**; the recovery image is updated to 2.3.0.
 - **Main menu reordered (recon-first)**: Scan Wi-Fi → BLE Scan → Channel Map →
   Capture Handshake → Send Beacon → Create AP → About.
@@ -201,8 +235,8 @@
   results on Ameba 3.1.7. On-device verified (34 APs, both bands).
 - **On-device handshake capture in the FAP** (P2, write-to-SD): the PCAP writer that was
   prototyped in `tools/bw16.py` now lives in the FAP, so the Flipper captures and saves
-  handshakes standalone (no Mac). New "Capture Handshake" main-menu item (gated on the
-  `H` capability bit), a LISTAP-based AP picker, and a capture screen showing live EAPOL
+  handshakes standalone (no Mac). New "Capture Handshake" main-menu item, a LISTAP-based
+  AP picker, and a capture screen showing live EAPOL
   count. Frames arrive as hex over UART, are decoded and written as a classic libpcap
   (LINKTYPE_IEEE802_11) to `/ext/apps_data/5ghost/handshake_<timestamp>.pcap`. Compile-
   verified both ends; the PCAP global header matches the on-device-verified sample
@@ -276,7 +310,7 @@
 ### Changed
 - P0: reverted the rejected custom menu to the clean stock baseline (kept in `backups/`);
   all v1.1 features retained.
-- Firmware IDENT now advertises `caps=DSEBH` (adds the `H` handshake bit) and `fw=1.1.0`
+- Firmware IDENT now advertises `fw=1.1.0`
   (reflecting the P1/P2 promisc + capture work). FAP bumped to 1.2; `GHOST_LATEST_FW`
   synced to 1.1.0 so the matching module doesn't falsely show an update hint. **The BW16
   must be reflashed** for the handshake menu to appear.
@@ -337,4 +371,4 @@
 ## v1.0
 
 - Initial 5Ghost rebrand of delfyRTL (MIT): L1 text handshake (`HELLO`/`IDENT`),
-  capability-gated main menu, BW16 (RTL8720DN) IDENT firmware. (tasks 1–6, 13)
+  BW16 (RTL8720DN) IDENT firmware. (tasks 1–6, 13)

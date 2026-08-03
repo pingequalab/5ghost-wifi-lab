@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.6.0-beta" src="https://img.shields.io/badge/app-v2.6.0--beta-555">
+  <img alt="Version 2.7.0" src="https://img.shields.io/badge/app-v2.7.0-555">
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 ---
 
 <!-- GEO entity-definition sentence: keep this as the first prose paragraph so AI answer engines can extract "what it is" verbatim. -->
-**5Ghost WiFi Lab is a dual-band 2.4 / 5 GHz Wi-Fi research tool for the Flipper Zero, built on the Realtek RTL8720DN (BW16) radio.** It is a native Flipper app plus a preloaded companion board that adds real 5 GHz scanning, WPA/WPA2 handshake capture and clientless PMKID capture *(beta)*, PMF / WPA3 detection, and BLE reconnaissance — for authorized security testing and education.
+**5Ghost WiFi Lab is a dual-band 2.4 / 5 GHz Wi-Fi research tool for the Flipper Zero, built on the Realtek RTL8720DN (BW16) radio.** It is a native Flipper app plus a preloaded companion board that adds real 5 GHz scanning, WPA/WPA2 handshake capture and clientless PMKID capture *(beta)*, PMF / WPA3 detection, and BLE reconnaissance and injection — tracker detection, GATT service recon, iBeacon broadcast and a BLE HID keyboard — for authorized security testing and education.
 
 ---
 
@@ -33,7 +33,7 @@ Almost every Flipper Wi-Fi add-on is built on an **ESP32**, and the common ESP32
 - 🛰️ **Real 5 GHz.** Scan, capture handshakes, and map congestion on the 5 GHz band that 2.4-only tools simply can't see.
 - 🛡️ **PMF / WPA3-aware.** It flags 802.11w (Protected Management Frames) and WPA3 APs — the ones that *ignore* deauth — so you stop wasting time on dead ends.
 - 🤝 **Captures that land.** On-device WPA/WPA2 4-way handshake and **clientless PMKID** *(beta)* straight to standard hashcat-ready files on the SD card.
-- 📻 **BLE recon a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists advertisers, flags Find My / AirTag trackers and nearby Flipper Zeros, and names vendors.
+- 📻 **BLE a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists advertisers, flags trackers across all four big ecosystems (AirTag, Tile, Samsung SmartTag, Google Find My) and nearby Flipper Zeros, names vendors — then goes active with GATT service discovery, iBeacon broadcast, and a BLE HID keyboard.
 - 🎛️ **One clean app, three firmwares.** Purpose-built UI for the 128×64 screen, and one build runs on Official, Momentum, and Unleashed.
 
 ---
@@ -60,7 +60,10 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 | 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake, routed over **5 GHz** where it lands, written as a standard PCAP to the SD card. Drop it into hashcat (22000) or aircrack-ng. |
 | 🎯 | **Clientless PMKID** *(beta)* | Captures a WPA/WPA2 **PMKID** via AUTHPROBE association — no client needed. On-device target picker across 2.4 + 5 GHz, a capture-quality gate, and export to `.22000` (hashcat mode 22000) + a `.json` record. |
 | 👥 | **Station recon** | Lists clients associated to a chosen AP, then targeted **deauth** and focused handshake capture on that client (2.4 + 5 GHz). |
-| 📻 | **BLE Scan** | Passive BLE sweep with multi-round accumulation and cross-scan de-dup — lists advertisers with RSSI + **vendor**, flags **Find My / AirTag trackers** and **nearby Flipper Zeros**, per-device detail + CSV export. |
+| 📻 | **BLE Scan** | Passive BLE sweep with multi-round accumulation and cross-scan de-dup — lists advertisers with RSSI + **vendor**, flags **trackers across all four big ecosystems** (Apple AirTag, Tile, Samsung SmartTag, Google Find My) and **nearby Flipper Zeros**, per-device detail + CSV export. |
+| 🔎 | **GATT Recon** | Actively connects to a chosen BLE device, enumerates its **GATT services**, and reads the **Device Information** profile (manufacturer / model / firmware) — detail passive scanning can't reach. |
+| 🔵 | **iBeacon Spoof** | Broadcasts a spec-compliant Apple **iBeacon** with a UUID / major / minor you set (or a built-in demo identity), for a 30 / 60 / 120 s window — proximity-beacon and detector testing. |
+| ⌨️ | **BadBLE HID** | Advertises a BLE **keyboard**; once the target pairs, types a keystroke payload — a built-in preset or your own script from the SD card, with manual start / stop / re-send. |
 | 🪤 | **Evil Portal** | Captive-portal page for authorized testing — built-in pages, bundled demo portals, or **load your own HTML** from the SD card. Auto-opens on iOS. |
 | 📶 | **Create AP · Multi-SSID Beacon** | Stand up a real joinable soft AP, or emit multiple named / multi-BSSID beacons for lab work and detector testing. |
 | 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. Hits every same-SSID mesh node in one pass. |
@@ -73,7 +76,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 - **Real dual-band on one board.** 5 GHz isn't a checkbox — scan, Channel Map, handshake, PMKID *(beta)*, and deauth all work on 5 GHz, not just 2.4.
 - **PMF / WPA3 awareness.** By parsing each beacon's RSN IE, it labels WPA3-SAE and 802.11w-required APs as **deauth-immune** up front — so you don't burn time attacking something that ignores you.
 - **Clientless PMKID** *(beta).* Grabs a crackable PMKID via AUTHPROBE without waiting for a client to connect — with an on-device capture-quality gate before it claims success.
-- **BLE recon a bare Flipper can't do.** Flipper's official firmware never exposes a general BLE scanner to apps ([issue #2906](https://github.com/flipperdevices/flipperzero-firmware/issues/2906), closed unimplemented); the BW16 lists every advertiser, flags Find My trackers and other Flipper Zeros, and names vendors.
+- **BLE recon + injection a bare Flipper can't do.** Flipper's official firmware never exposes a general BLE scanner to apps ([issue #2906](https://github.com/flipperdevices/flipperzero-firmware/issues/2906), closed unimplemented); the BW16 lists every advertiser, flags trackers across all four big ecosystems (AirTag, Tile, Samsung SmartTag, Google Find My) and other Flipper Zeros, names vendors — then goes active with GATT service discovery, iBeacon broadcast, and a BLE HID keyboard.
 - **One build, three firmwares.** A single `.fap` runs on Official, Momentum, and Unleashed (it avoids the APIs the official firmware disables, so it loads cleanly everywhere).
 - **Browser-based recovery.** If the module firmware ever gets corrupted, it re-flashes from a desktop Chromium/Firefox browser over USB — no toolchain to install. See [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
@@ -97,7 +100,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-07)* | 2.6.0-beta | v1.14.0 | 1.16 | v2.0 |
+| Latest version *(2026-07)* | 2.7.0 | v1.14.0 | 1.16 | v2.0 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -138,8 +141,8 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
-**What's new in 2.6.0-beta?**
-Clientless PMKID capture with an on-device target picker and capture-quality gate (exports `.22000` + `.json`), and multi-SSID / multi-BSSID beacon generation for lab and detector testing. WiFi station recon and BLE accumulation carry over from 2.5.0-beta.
+**What's new in 2.7.0?**
+An expanded BLE suite, all validated on real hardware: **GATT reconnaissance** (actively connect to a device and read its Device Information), **iBeacon spoofing** (broadcast a custom Apple iBeacon), **BadBLE HID** (advertise a BLE keyboard and type a keystroke payload once the target pairs), and **tracker detection across all four big ecosystems** — Apple AirTag, Tile, Samsung SmartTag and Google Find My (FMDN). Dual-band scan, deauth, Evil Portal, handshake and clientless PMKID capture from earlier releases are unchanged.
 
 **What is clientless PMKID capture?**
 It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing.
@@ -148,7 +151,7 @@ It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waitin
 No — and neither can any other tool offline. WPA3-SAE is designed so a captured handshake has no offline-crackable hash. 5Ghost detects WPA3 / PMF and tells you it's out of scope rather than pretending otherwise.
 
 **Can a bare Flipper Zero scan Bluetooth LE?**
-No. Flipper's official firmware doesn't expose a general BLE scanner to third-party apps (feature request #2906 is closed, unimplemented). 5Ghost's BW16 radio does the BLE sweep — listing advertisers, flagging Find My / AirTag trackers and other Flipper Zeros, and naming vendors.
+No. Flipper's official firmware doesn't expose a general BLE scanner to third-party apps (feature request #2906 is closed, unimplemented). 5Ghost's BW16 radio does the BLE sweep — listing advertisers, flagging trackers across all four big ecosystems (Apple AirTag, Tile, Samsung SmartTag, Google Find My) and other Flipper Zeros, and naming vendors. It can also actively connect for GATT recon, broadcast an iBeacon, and act as a BLE HID keyboard.
 
 **Which Flipper firmware does it need?**
 One universal `.fap` runs on all three major firmwares — **Official**, **Momentum**, and **Unleashed** (API 87.1). It avoids the APIs Official disables, so it loads cleanly everywhere.
