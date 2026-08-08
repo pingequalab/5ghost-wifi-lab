@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [2.7.1] — 2026-08-08
+
+> Multi-AP deauth. Pick any mix of access points — across different SSIDs — straight
+> from the scan list and deauth them together in one pass, with the firmware
+> round-robining every target (channel-hopping as needed). Same-SSID mesh deauth now
+> reliably hits every node in the group. BLE recon/injection, dual-band scan, Evil
+> Portal, handshake and clientless PMKID capture are unchanged. API 87.1, still loads
+> on Official · Momentum · Unleashed.
+
+### Added
+- **Multi-AP deauth from the scan list** — toggle-select any set of access points in
+  the scan list, including across different SSIDs, then deauth them all at once. The
+  firmware keeps a target list and round-robins deauth across every entry, so all
+  selected APs are hit in a single run rather than one at a time.
+
+### Fixed
+- **Same-SSID mesh deauth now targets every node**, not just the last one enumerated —
+  deauthing a network from its detail page covers all mesh nodes sharing that SSID in
+  one pass.
+- **Stopping an attack always clears armed targets** — stopping while already idle now
+  empties the target list, so a later run never reuses stale targets.
+
 ## [2.7.0] — 2026-07-30
 
 > BLE reconnaissance & injection expansion, all validated on real hardware: GATT

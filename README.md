@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.0" src="https://img.shields.io/badge/app-v2.7.0-555">
+  <img alt="Version 2.7.1" src="https://img.shields.io/badge/app-v2.7.1-555">
 </p>
 
 <p align="center">
@@ -66,7 +66,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 | ⌨️ | **BadBLE HID** | Advertises a BLE **keyboard**; once the target pairs, types a keystroke payload — a built-in preset or your own script from the SD card, with manual start / stop / re-send. |
 | 🪤 | **Evil Portal** | Captive-portal page for authorized testing — built-in pages, bundled demo portals, or **load your own HTML** from the SD card. Auto-opens on iOS. |
 | 📶 | **Create AP · Multi-SSID Beacon** | Stand up a real joinable soft AP, or emit multiple named / multi-BSSID beacons for lab work and detector testing. |
-| 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. Hits every same-SSID mesh node in one pass. |
+| 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. **Select any mix of APs across different SSIDs from the scan list and deauth them together**, or hit every same-SSID mesh node in one pass from its detail page. |
 | 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), and BLE lists save under `/ext/apps_data/5ghost/` with an atomic write + on-screen save confirmation. |
 
 ---
@@ -100,7 +100,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-07)* | 2.7.0 | v1.14.0 | 1.16 | v2.0 |
+| Latest version *(2026-07)* | 2.7.1 | v1.14.0 | 1.16 | v2.0 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -141,8 +141,8 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
-**What's new in 2.7.0?**
-An expanded BLE suite, all validated on real hardware: **GATT reconnaissance** (actively connect to a device and read its Device Information), **iBeacon spoofing** (broadcast a custom Apple iBeacon), **BadBLE HID** (advertise a BLE keyboard and type a keystroke payload once the target pairs), and **tracker detection across all four big ecosystems** — Apple AirTag, Tile, Samsung SmartTag and Google Find My (FMDN). Dual-band scan, deauth, Evil Portal, handshake and clientless PMKID capture from earlier releases are unchanged.
+**What's new in 2.7.1?**
+**Multi-AP deauth** — select any mix of access points across different SSIDs straight from the scan list and deauth them all in one pass; the firmware round-robins every target, and same-SSID mesh nodes are still hit together from a network's detail page. This builds on 2.7.0's BLE suite — GATT reconnaissance, iBeacon spoofing, BadBLE HID, and tracker detection across all four big ecosystems (Apple AirTag, Tile, Samsung SmartTag, Google Find My). Dual-band scan, Evil Portal, handshake and clientless PMKID capture are unchanged.
 
 **What is clientless PMKID capture?**
 It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing.
