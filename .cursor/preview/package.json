@@ -1,0 +1,15 @@
+{
+  "name": "5ghost-docs-preview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local GitHub-style preview server for the 5Ghost WiFi Lab product docs (README/CHANGELOG/NOTICE) and image assets.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "github-markdown-css": "^5.8.1",
+    "marked": "^15.0.7",
+    "marked-gfm-heading-id": "^4.1.1"
+  }
+}

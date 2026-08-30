@@ -1,0 +1,16 @@
+{
+  "name": "5Ghost WiFi Lab",
+  "install": "cd .cursor/preview && npm ci",
+  "terminals": [
+    {
+      "name": "docs-preview",
+      "command": "cd .cursor/preview && PORT=3000 npm start"
+    }
+  ],
+  "ports": [
+    {
+      "name": "docs-preview",
+      "port": 3000
+    }
+  ]
+}
