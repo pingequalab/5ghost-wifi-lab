@@ -144,8 +144,14 @@ Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add
 **What's new in 2.7.1?**
 **Multi-AP deauth** — select any mix of access points across different SSIDs straight from the scan list and deauth them all in one pass; the firmware round-robins every target, and same-SSID mesh nodes are still hit together from a network's detail page. This builds on 2.7.0's BLE suite — GATT reconnaissance, iBeacon spoofing, BadBLE HID, and tracker detection across all four big ecosystems (Apple AirTag, Tile, Samsung SmartTag, Google Find My). Dual-band scan, Evil Portal, handshake and clientless PMKID capture are unchanged.
 
+**How do I capture a WPA handshake / EAPOL?**
+Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
+
 **What is clientless PMKID capture?**
-It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing.
+It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
+
+**How do I capture a PMKID?**
+Open **Capture PMKID**, pick a WPA2 AP (any band), wait a few seconds. Only **Valid PMKID** writes a `.22000` file. It is still beta. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
 
 **Can 5Ghost crack WPA3?**
 No — and neither can any other tool offline. WPA3-SAE is designed so a captured handshake has no offline-crackable hash. 5Ghost detects WPA3 / PMF and tells you it's out of scope rather than pretending otherwise.
@@ -176,6 +182,58 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
 The board ships **preloaded** — there's nothing to flash. Need to recover a board? Use the browser flasher at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
+
+---
+
+## How to capture handshake and PMKID
+
+These are **two different tools**. Handshake captures the WPA/WPA2 4-way EAPOL exchange from a reconnecting client. PMKID *(beta)* makes the board associate itself and pulls a PMKID from EAPOL message 1 — no client required.
+
+Only test networks you **own** or have **written permission** to test.
+
+### Capture Handshake (EAPOL 4-way)
+
+This is the stable path.
+
+1. **Apps → GPIO → 5Ghost WiFi Lab → Capture Handshake.**
+2. Wait for the scan. The list is titled **Pick 5G AP (handshake)** — 2.4 GHz rows are hidden because this radio often cannot hear the client's M2/M4 uplink on 2.4 GHz.
+3. Pick a **5 GHz WPA2** AP. Skip pure WPA3-SAE. APs tagged **P!** (PMF required) ignore deauth, so they usually will not yield a handshake this way.
+4. Keep a phone or other client associated to that network. If the screen says **Reconnect a client**, reconnect it.
+5. Watch `EAPOL:N` climb. When you see **Valid M1M2** or **Valid M2M3**, press **Back** to stop and save.
+6. Files land on the Flipper SD under `/ext/apps_data/5ghost/`:
+   - `capture_<session>.pcap` — written only when the capture is valid
+   - `capture_<session>.json` — metadata sidecar
+7. On a computer, open the PCAP in Wireshark (`eapol` filter), or convert with `hcxpcapngtool` and crack with `hashcat -m 22000`.
+
+If nothing lands: no client on the AP, too far, WPA3 / PMF-required, or you left before a valid pair.
+
+### Capture PMKID *(beta, clientless)*
+
+Still **beta** — the capture-to-hash path is verified; treat live-AP results as experimental.
+
+1. **Apps → GPIO → 5Ghost WiFi Lab → Capture PMKID.**
+2. The list is titled **Pick AP (PMKID)** and includes **both bands**.
+3. Pick a **WPA2-PSK** (or WPA2/WPA3 transition) AP. Pure WPA3-SAE has no offline-crackable hash.
+4. Leave it. A run finishes in a few seconds. No client needed.
+5. Only **Valid PMKID** writes a hash file:
+   - `pmkid_<session>.22000` — one hashcat `WPA*01` line, only on Valid
+   - `pmkid_<session>.json` — written for every outcome
+6. Crack: `hashcat -m 22000 pmkid_<session>.22000 wordlist.txt`
+
+| Screen | Meaning |
+|---|---|
+| **Valid PMKID** | Hash written — crack it |
+| **Duplicate** | Already captured this BSSID this session |
+| **Wrong target** | Reply was not for the AP you picked — retry |
+| **AP refused** | Auth/assoc rejected — try handshake instead |
+| **No response** | Timed out — move closer, rescan |
+| **No PMKID (unfit AP)** | AP answered but M1 has no usable PMKID. Roughly 10–20% of WPA2 APs do this. That is the AP, not a bug. |
+
+PMKID does **not** write a PCAP. If you want EAPOL frames in Wireshark, use **Capture Handshake**.
+
+### Missing menu items
+
+Both captures need firmware capability **H**. If **Capture Handshake** / **Capture PMKID** are missing from the menu, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
 ---
 
