@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [2.7.4] — 2026-09-01
+
+> Flipper app only. Board firmware stays **2.7.3** — update the `.fap` from GitHub
+> Releases; you do not need to reflash the board.
+
+### Added
+- **Guided Audit** on the main menu (between Channel Map and Capture Handshake).
+  Pick an AP; the app chooses handshake or clientless PMKID from PMF and whether
+  stations are present. The result is a short word: Complete, Partial,
+  Unsupported, Timeout, or Blocked. Complete only if a quality-gated PCAP or
+  `.22000` file was written. DFS channels stay receive-only (Unsupported).
+  Capture Handshake and Capture PMKID remain for manual use.
+
 ## [2.7.3] — 2026-09-01
 
 > Firmware + Flipper app. Update both — the 2.7.1 app can time out on the longer scan.

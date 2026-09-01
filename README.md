@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.3" src="https://img.shields.io/badge/app-v2.7.3-555">
+  <img alt="Version 2.7.4" src="https://img.shields.io/badge/app-v2.7.4-555">
 </p>
 
 <p align="center">
@@ -57,6 +57,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 |---|---|---|
 | 📡 | **Dual-band scan** | Lists 2.4 **and 5 GHz** APs with signal, encryption, **precise PMF** (capable / required), **WPA3 detection**, and same-SSID mesh markers. |
 | 📊 | **Channel Map** | Congestion view across both bands with the least-busy channel highlighted — pick a clear channel, or find where the targets are. |
+| 🧭 | **Guided Audit** | Pick an AP; the app chooses handshake or clientless PMKID from PMF and whether stations are present, then shows a short result. Complete only if a quality-gated PCAP or `.22000` file was written. DFS is receive-only (Unsupported). |
 | 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake, routed over **5 GHz** where it lands, written as a standard PCAP to the SD card. Drop it into hashcat (22000) or aircrack-ng. |
 | 🎯 | **Clientless PMKID** *(beta)* | Captures a WPA/WPA2 **PMKID** via AUTHPROBE association — no client needed. On-device target picker across 2.4 + 5 GHz, a capture-quality gate, and export to `.22000` (hashcat mode 22000) + a `.json` record. |
 | 👥 | **Station recon** | Lists clients associated to a chosen AP, then targeted **deauth** and focused handshake capture on that client (2.4 + 5 GHz). |
@@ -100,7 +101,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-09)* | 2.7.3 | v1.14.0 | 1.16 | v2.0 |
+| Latest version *(2026-09)* | 2.7.4 | v1.14.0 | 1.16 | v2.0 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -141,8 +142,14 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
+**What's new in 2.7.4?**
+The Flipper app adds **Guided Audit** on the main menu. Firmware stays 2.7.3 — update the app from [Releases](../../releases); you do not need to reflash the board. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
+
 **What's new in 2.7.3?**
 Passive scan now covers 2.4 GHz channels 1–13 and 5 GHz 20 MHz channels 36–48, 52–64, 100–144, 149–165, so EU 5 GHz APs on DFS and channel 165 show up in the list. Transmit (deauth / AP / beacon / handshake / PMKID) stays off DFS — those channels are receive-only. Channel 14 is not included (Japan 802.11b-only; EU 2.4 GHz is 1–13). **Update both the board firmware and the Flipper app** — the 2.7.1 app can time out on the longer scan.
+
+**How do I run a guided audit?**
+Open **Guided Audit**, pick an AP, wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Complete only if a quality-gated PCAP or `.22000` file was written. DFS channels are receive-only (Unsupported). Update the Flipper app from GitHub Releases; firmware 2.7.3 is enough. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
 
 **How do I capture a WPA handshake / EAPOL?**
 Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
@@ -184,6 +191,29 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 The board ships **preloaded** — there's nothing to flash. Need to recover a board? Use the browser flasher at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
 ---
+
+## How to run a guided audit
+
+**Guided Audit** is the short path: pick an AP and wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Capture Handshake and Capture PMKID stay on the menu if you want to run one path yourself — [steps below](#how-to-capture-handshake-and-pmkid).
+
+Only test networks you **own** or have **written permission** to test.
+
+1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.4** or newer; firmware **2.7.3** is enough.
+2. Wait for the scan if the list is empty. The list is titled **Pick AP (audit)** and includes **both bands**. DFS rows are selectable.
+3. Pick the AP. Do not pick Handshake vs PMKID yourself.
+4. Wait. The screen shows `STA` / `HS` / `PMKID`, then a short result.
+
+| Screen | Meaning |
+|---|---|
+| **Complete** | A quality-gated `capture_*.pcap` or `pmkid_*.22000` was written, plus `audit_*.json` |
+| **Partial** | Metadata only — not a crackable capture |
+| **Unsupported** | Channel is receive-only (DFS / non-TX). Nothing was transmitted |
+| **Timeout** | Scan, station sweep, or capture did not finish |
+| **Blocked** | PMF / AP policy refused the path |
+
+Files land under `/ext/apps_data/5ghost/` with the same session id. Complete is the only success word — a progress counter is not Complete.
+
+The PMKID branch is still **beta** (same limits as Capture PMKID). Pure WPA3-SAE has no offline-crackable hash.
 
 ## How to capture handshake and PMKID
 
@@ -233,7 +263,7 @@ PMKID does **not** write a PCAP. If you want EAPOL frames in Wireshark, use **Ca
 
 ### Missing menu items
 
-Both captures need firmware capability **H**. If **Capture Handshake** / **Capture PMKID** are missing from the menu, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
+If **Guided Audit** is missing, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Capture Handshake** / **Capture PMKID** / **Guided Audit** are all missing, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
 
 ---
 
