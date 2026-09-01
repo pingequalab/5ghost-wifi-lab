@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## [2.7.3] — 2026-09-01
+
+> Firmware + Flipper app. Update both — the 2.7.1 app can time out on the longer scan.
+
+### Changed
+- Passive scan now covers 2.4 GHz channels 1–13 and 5 GHz 20 MHz channels
+  36–48, 52–64, 100–144, 149–165, so EU 5 GHz APs on DFS and channel 165
+  show up in the list.
+- Transmit (deauth / AP / beacon / handshake / PMKID) stays off DFS.
+  Those channels are receive-only.
+- Channel 14 is not included (Japan 802.11b-only; EU 2.4 GHz is 1–13).
+
+## [2.7.2] — 2026-08-08
+
+> Firmware maintenance release. The Flipper app is unchanged from 2.7.1 — dual-band
+> Wi-Fi, deauth, Evil Portal, handshake and clientless PMKID capture, and the full
+> BLE suite (GATT recon, iBeacon spoofing, BadBLE HID, tracker detection) all behave
+> exactly as in 2.7.1. API 87.1, still loads on Official · Momentum · Unleashed.
+
+### Changed
+- Firmware housekeeping and version bump to 2.7.2. The Flipper app (`.fap`) is
+  unchanged from 2.7.1 and remains current — no reflash of the app is needed.
+
 ## [2.7.1] — 2026-08-08
 
 > Multi-AP deauth. Pick any mix of access points — across different SSIDs — straight

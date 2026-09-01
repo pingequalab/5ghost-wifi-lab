@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.1" src="https://img.shields.io/badge/app-v2.7.1-555">
+  <img alt="Version 2.7.3" src="https://img.shields.io/badge/app-v2.7.3-555">
 </p>
 
 <p align="center">
@@ -100,7 +100,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-07)* | 2.7.1 | v1.14.0 | 1.16 | v2.0 |
+| Latest version *(2026-09)* | 2.7.3 | v1.14.0 | 1.16 | v2.0 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -141,8 +141,8 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
-**What's new in 2.7.1?**
-**Multi-AP deauth** — select any mix of access points across different SSIDs straight from the scan list and deauth them all in one pass; the firmware round-robins every target, and same-SSID mesh nodes are still hit together from a network's detail page. This builds on 2.7.0's BLE suite — GATT reconnaissance, iBeacon spoofing, BadBLE HID, and tracker detection across all four big ecosystems (Apple AirTag, Tile, Samsung SmartTag, Google Find My). Dual-band scan, Evil Portal, handshake and clientless PMKID capture are unchanged.
+**What's new in 2.7.3?**
+Passive scan now covers 2.4 GHz channels 1–13 and 5 GHz 20 MHz channels 36–48, 52–64, 100–144, 149–165, so EU 5 GHz APs on DFS and channel 165 show up in the list. Transmit (deauth / AP / beacon / handshake / PMKID) stays off DFS — those channels are receive-only. Channel 14 is not included (Japan 802.11b-only; EU 2.4 GHz is 1–13). **Update both the board firmware and the Flipper app** — the 2.7.1 app can time out on the longer scan.
 
 **How do I capture a WPA handshake / EAPOL?**
 Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
