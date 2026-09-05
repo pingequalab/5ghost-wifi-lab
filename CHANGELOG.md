@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [2.7.5] — 2026-09-05
+
+> Flipper app only. Board firmware stays **2.7.3** — install **2.7.5** from GitHub
+> Releases; you do not need to reflash the board.
+
+### Added
+- **Guided Audit** on the main menu (between Channel Map and Capture Handshake).
+  Same path as public 2.7.4: pick an AP; the app chooses handshake or clientless
+  PMKID from PMF and whether stations are present. Complete only if a
+  quality-gated PCAP or `.22000` file was written. DFS stays receive-only
+  (Unsupported). Capture Handshake and Capture PMKID remain for manual use.
+
+### Fixed
+- GPIO UART: disable Flipper Expansion before acquiring USART, so Scan no
+  longer false-reports "Check 5V/wiring" when Expansion still owns the port.
+- Home menu wraps from the first item to the last and back. Back from About
+  stays on About, not BadBLE.
+
 ## [2.7.4] — 2026-09-01
 
 > Flipper app only. Board firmware stays **2.7.3** — update the `.fap` from GitHub
