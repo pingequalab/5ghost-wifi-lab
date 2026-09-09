@@ -4,7 +4,8 @@ MIT License
 
 Copyright (c) 2026 PINGEQUA — 5Ghost WiFi Lab (protocol, branding, dual-band &
                               PMF features, UI, refactor)
-Copyright (c) 2025 gorebrau — delfyRTL, the base Flipper application (MIT)
+Copyright (c) 2025 gorebrau — delfyRTL flipper-app, the FAP base (MIT;
+                              delfyRTL firmware subtree is GPLv3 — see NOTICE.md)
 Copyright (c) 2023 Derek Jamison — UART helper / ring-buffer pattern (MIT)
 
 This license covers the Flipper Zero application (FAP) only. The BW16

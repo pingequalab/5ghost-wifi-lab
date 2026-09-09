@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.5" src="https://img.shields.io/badge/app-v2.7.5-555">
+  <img alt="Version 2.7.6" src="https://img.shields.io/badge/app-v2.7.6-555">
 </p>
 
 <p align="center">
@@ -69,7 +69,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 | 🪤 | **Evil Portal** | Captive-portal page for authorized testing — built-in pages, bundled demo portals, or **load your own HTML** from the SD card. Auto-opens on iOS. |
 | 📶 | **Create AP · Multi-SSID Beacon** | Stand up a real joinable soft AP, or emit multiple named / multi-BSSID beacons for lab work and detector testing. |
 | 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. **Select any mix of APs across different SSIDs from the scan list and deauth them together**, or hit every same-SSID mesh node in one pass from its detail page. |
-| 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), Guided Audit sidecars (`audit_*.json`), and BLE lists save under `/ext/apps_data/5ghost/` with an atomic write + on-screen save confirmation. |
+| 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), Guided Audit sidecars (`audit_*.json`), and BLE lists save under `/ext/apps_data/5ghost_wifi_lab/` with an atomic write + on-screen save confirmation. |
 
 ---
 
@@ -107,7 +107,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-09)* | 2.7.5 | v1.15.1 | 1.16.1 | v2.1.1 |
+| Latest version *(2026-09)* | 2.7.6 | v1.15.1 | 1.16.1 | v2.1.1 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -149,8 +149,8 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
-**What's new in 2.7.5?**
-Install the Flipper app **2.7.5** from [GitHub Releases](../../releases). It is Guided Audit plus two fixes: Expansion no longer steals GPIO UART (Scan false-reporting 5V), and the home menu wraps / About Back stays on About. Firmware stays 2.7.3 — you do not need to reflash the board.
+**What's new in 2.7.6?**
+Install the Flipper app **2.7.6** from [GitHub Releases](../../releases). Captures now save under `/ext/apps_data/5ghost_wifi_lab/` (existing files are moved on launch). The About page links to this GitHub repository. Firmware stays 2.7.3 — you do not need to reflash the board.
 
 **What's new in 2.7.4?**
 The Flipper app adds **Guided Audit** on the main menu. Firmware stays 2.7.3 — update the app from [Releases](../../releases); you do not need to reflash the board. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
@@ -177,7 +177,7 @@ Open **BadBLE HID**, pick a built-in payload or a `.txt` from the SD card, pick 
 **Send Beacon** only broadcasts names — phones see SSIDs they cannot join. **Create AP** starts a real joinable access point, optionally with a captive portal. Full steps: [How to send beacons vs create an AP](#how-to-send-beacons-vs-create-an-ap).
 
 **How do I capture a WPA handshake / EAPOL?**
-Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
+Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost_wifi_lab/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
 
 **What is clientless PMKID capture?**
 It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
@@ -209,7 +209,7 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 
 ## Install
 
-1. Download the latest **`.fap`** (**2.7.5**) from [**Releases**](../../releases).
+1. Download the latest **`.fap`** (**2.7.6**) from [**Releases**](../../releases).
 2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
 3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
@@ -223,7 +223,7 @@ The board ships **preloaded**. **Firmware 2.7.3 is enough for Guided Audit** —
 
 Only test networks you **own** or have **written permission** to test.
 
-1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.5** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
+1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.6** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
 2. Wait for the scan if the list is empty. The list is titled **Pick AP (audit)** and includes **both bands**. DFS rows are selectable. **Rescan** repeats the sweep.
 
    ![Pick AP (audit)](assets/screenshots/audit-pick.png)
@@ -240,7 +240,7 @@ Only test networks you **own** or have **written permission** to test.
 | **Timeout** | Scan, station sweep, or capture did not finish |
 | **Blocked** | PMF / AP policy refused the path |
 
-Files land under `/ext/apps_data/5ghost/` with the same session id. Complete is the only success word — a progress counter is not Complete.
+Files land under `/ext/apps_data/5ghost_wifi_lab/` with the same session id. Complete is the only success word — a progress counter is not Complete.
 
 The PMKID branch is still **beta** (same limits as Capture PMKID). Pure WPA3-SAE has no offline-crackable hash.
 
@@ -261,7 +261,7 @@ This is the stable path.
 3. Pick a **5 GHz WPA2** AP. Skip pure WPA3-SAE. APs tagged **P!** (PMF required) ignore deauth, so they usually will not yield a handshake this way.
 4. Keep a phone or other client associated to that network. If the screen says **Reconnect a client**, reconnect it.
 5. Watch `EAPOL:N` climb. When you see **Valid M1M2** or **Valid M2M3**, press **Back** to stop and save.
-6. Files land on the Flipper SD under `/ext/apps_data/5ghost/`:
+6. Files land on the Flipper SD under `/ext/apps_data/5ghost_wifi_lab/`:
    - `capture_<session>.pcap` — written only when the capture is valid
    - `capture_<session>.json` — metadata sidecar
 7. On a computer, open the PCAP in Wireshark (`eapol` filter), or convert with `hcxpcapngtool` and crack with `hashcat -m 22000`.
@@ -321,7 +321,7 @@ A bare Flipper cannot run a general BLE scanner. This path uses the BW16.
 2. List shows MAC or name, RSSI, vendor. `!Track N` means Find My / AirTag / Tile / SmartTag / FMDN hits this round.
 3. **OK** = device detail · **Right** = another sweep merged into the same list (de-dup by MAC) · **Left** = alarms-only filter.
 4. On detail: **OK** = GATT recon (connect, list known services, read Device Information) · **Right** = raw advert bytes.
-5. CSV lands under `/ext/apps_data/5ghost/` after a successful scan.
+5. CSV lands under `/ext/apps_data/5ghost_wifi_lab/` after a successful scan.
 
 GATT needs a connectable peripheral. `Not connectable` / `Discovery timeout` means the device refused or went away — that is not a crash.
 
@@ -360,7 +360,7 @@ If nothing types: the host never completed pairing / HID notifications. Back, pa
 
 1. Open **Create AP**. Set **AP Name**, security / password, **Channel** (TX table only — not DFS), **Portal Type**.
 2. **Load Custom Portal** / **Portal File** uploads HTML from the SD card. Custom will not Start until the upload ACKs.
-3. **Start**. Clients can associate. Submitted credentials show on screen and save under `/ext/apps_data/5ghost/`.
+3. **Start**. Clients can associate. Submitted credentials show on screen and save under `/ext/apps_data/5ghost_wifi_lab/`.
 4. From an AP **detail** page, **Right (Evil)** runs a portal using that AP's name — same idea, cloned SSID.
 
 iOS usually auto-opens the portal. Android may need an HTTP page if Private DNS / DoH is on.

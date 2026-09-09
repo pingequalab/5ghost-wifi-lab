@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2.7.6] — 2026-09-09
+
+> Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.
+
+### Changed
+- SD captures now write under `/ext/apps_data/5ghost_wifi_lab/` (the app id folder).
+  Files already in `/ext/apps_data/5ghost/` are moved on the next launch.
+- About page and app website field point at the public GitHub repository.
+
 ## [2.7.5] — 2026-09-05
 
 > Flipper app only. Board firmware stays **2.7.3** — install **2.7.5** from GitHub
