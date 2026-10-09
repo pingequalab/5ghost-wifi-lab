@@ -62,14 +62,14 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 | 🤝 | **Capture Handshake** | Forces a reconnect and grabs the WPA/WPA2 4-way handshake, routed over **5 GHz** where it lands, written as a standard PCAP to the SD card. Drop it into hashcat (22000) or aircrack-ng. |
 | 🎯 | **Clientless PMKID** *(beta)* | Captures a WPA/WPA2 **PMKID** via AUTHPROBE association — no client needed. On-device target picker across 2.4 + 5 GHz, a capture-quality gate, and export to `.22000` (hashcat mode 22000) + a `.json` record. |
 | 👥 | **Station recon** | Lists clients associated to a chosen AP, then targeted **deauth** and focused handshake capture on that client (2.4 + 5 GHz). |
-| 📻 | **BLE Scan** | Passive BLE sweep with multi-round accumulation and cross-scan de-dup — lists advertisers with RSSI + **vendor**, flags **trackers across all four big ecosystems** (Apple AirTag, Tile, Samsung SmartTag, Google Find My) and **nearby Flipper Zeros**, per-device detail + CSV export. |
+| 📻 | **BLE** | Passive BLE sweep with multi-round accumulation and cross-scan de-dup — lists advertisers with RSSI + **vendor**, flags **trackers across all four big ecosystems** (Apple AirTag, Tile, Samsung SmartTag, Google Find My) and **nearby Flipper Zeros**, per-device detail, CSV export, and save of one scanned advertisement. |
 | 🔎 | **GATT Recon** | Actively connects to a chosen BLE device, enumerates its **GATT services**, and reads the **Device Information** profile (manufacturer / model / firmware) — detail passive scanning can't reach. |
 | 🔵 | **iBeacon Spoof** | Broadcasts a spec-compliant Apple **iBeacon** with a UUID / major / minor you set (or a built-in demo identity), for a 30 / 60 / 120 s window — proximity-beacon and detector testing. |
 | ⌨️ | **BadBLE HID** | Advertises a BLE **keyboard**; once the target pairs, types a keystroke payload — a built-in preset or your own script from the SD card, with manual start / stop / re-send. |
 | 🪤 | **Evil Portal** | Captive-portal page for authorized testing — built-in pages, bundled demo portals, or **load your own HTML** from the SD card. Auto-opens on iOS. |
 | 📶 | **Create AP · Multi-SSID Beacon** | Stand up a real joinable soft AP, or emit multiple named / multi-BSSID beacons for lab work and detector testing. |
 | 🚫 | **PMF-aware Deauth** | Deauth on 2.4 + 5 GHz that **tells you** when a target is 802.11w / WPA3-protected (deauth-immune) instead of failing silently. **Select any mix of APs across different SSIDs from the scan list and deauth them together**, or hit every same-SSID mesh node in one pass from its detail page. |
-| 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), Guided Audit sidecars (`audit_*.json`), and BLE lists save under `/ext/apps_data/5ghost_wifi_lab/` with an atomic write + on-screen save confirmation. |
+| 💾 | **Evidence to SD** | Scans (CSV), handshakes/PMKIDs (PCAP / `.22000` / `.json`), Guided Audit sidecars (`audit_*.json`), BLE lists, and `bleadv.txt` save under `/ext/apps_data/5ghost_wifi_lab/` with an atomic write + on-screen save confirmation. |
 
 ---
 
@@ -297,8 +297,8 @@ PMKID does **not** write a PCAP. If you want EAPOL frames in Wireshark, use **Ca
 
 ## How to scan, deauth, and list stations
 
-1. Open **Scan Wi-Fi**. The app runs a passive dual-band sweep, then the list.
-2. **OK** opens AP detail (encryption, channel, band, MAC, vendor when known).
+1. Open **Scan Wi-Fi**. The app runs a passive dual-band sweep, then the list. The selected row scrolls a long name. Any other row that does not fit ends with `...`. Short names and `<hidden>` stay as they are.
+2. **OK** opens AP detail (encryption, channel, band, MAC, vendor when known). The detail title scrolls when the name does not fit.
 3. On the detail page: **Left** = Edit attack options · **OK** = Deauth / Stop (every same-SSID mesh node) or **RX only** on DFS · **Right** = Evil Portal on that AP · **Down** = station list (`STASCAN`).
 4. On the station list, **OK** deauths **that one client** (not a broadcast). DFS is still receive-only.
 5. Back on the scan list: **Left** ticks APs across SSIDs · **Left-long** deauths every ticked AP together · **Right** re-scans in place · **Back** while a multi-deauth is running stops it.
@@ -316,17 +316,29 @@ Uses the last **Scan Wi-Fi** list (no extra radio command).
 
 ![Channel Map](assets/screenshots/channel-map.png)
 
-## How to use BLE Scan and GATT recon
+## How to use BLE and GATT recon
 
-A bare Flipper cannot run a general BLE scanner. This path uses the BW16.
+A bare Flipper cannot run a general BLE scanner. This path uses the BW16. The home item is **BLE**. Opening it does not scan.
 
-1. Open **BLE Scan**. Wait for the sweep.
-2. List shows MAC or name, RSSI, vendor. `!Track N` means Find My / AirTag / Tile / SmartTag / FMDN hits this round.
-3. **OK** = device detail · **Right** = another sweep merged into the same list (de-dup by MAC) · **Left** = alarms-only filter.
+1. Open **BLE**.
+2. **Scan nearby** clears the list and runs one sweep. After that sweep, **Nearby n** opens the same list and does not scan. **Saved** opens the library and does not scan.
+3. On the device list: name or MAC, RSSI, vendor. `!Track N` means Find My / AirTag / Tile / SmartTag / FMDN hits this round. **OK** opens device detail. **Right** runs another sweep and merges it into the same list (de-dup by MAC). **Left** has no filter.
 4. On detail: **OK** = GATT recon (connect, list known services, read Device Information) · **Right** = raw advert bytes.
 5. CSV lands under `/ext/apps_data/5ghost_wifi_lab/` after a successful scan.
 
 GATT needs a connectable peripheral. `Not connectable` / `Discovery timeout` means the device refused or went away — that is not a crash.
+
+## How to save a BLE advertisement
+
+Saving uses app **2.7.7**. It does not need new board firmware.
+
+1. Open **BLE → Scan nearby** and wait for the list. **Nearby n** reopens that list.
+2. **OK** on a device, then **Right** for the raw bytes.
+3. **OK** saves. The screen says **Saved**. The file is `/ext/apps_data/5ghost_wifi_lab/bleadv.txt`.
+
+To replay later: **BLE → Saved**, pick one entry, then **30 / 60 / 120** seconds. **Back** leaves Replay TX and stops the broadcast.
+
+Public board firmware is still **2.7.3**, which cannot replay. That page shows **Firmware too old**. Replay waits for a later board firmware. This app update does not reflash the board.
 
 ## How to spoof an iBeacon
 
@@ -370,7 +382,7 @@ iOS usually auto-opens the portal. Android may need an HTTP page if Private DNS 
 
 ### Missing menu items
 
-If **Guided Audit** is missing, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Capture Handshake** / **Capture PMKID** / **Guided Audit** are all missing, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE Scan** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.3**.
+If **Guided Audit** is missing, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Capture Handshake** / **Capture PMKID** / **Guided Audit** are all missing, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.3**.
 
 ---
 
