@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [2.7.7] — 2026-10-09
+
+> Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.
+
+### Added
+- Long Wi-Fi names scroll on the selected scan row and on the access-point
+  detail title. Rows that are not selected, and do not fit, end with `...`.
+- BLE can save one scanned advertisement under
+  `/ext/apps_data/5ghost_wifi_lab/bleadv.txt` and broadcast those bytes again.
+  Saving works on firmware 2.7.3. Broadcasting needs a later board firmware;
+  this release does not include it. Older firmware shows "Firmware too old".
+
 ## [2.7.6] — 2026-09-09
 
 > Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.

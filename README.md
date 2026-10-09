@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.6" src="https://img.shields.io/badge/app-v2.7.6-555">
+  <img alt="Version 2.7.7" src="https://img.shields.io/badge/app-v2.7.7-555">
 </p>
 
 <p align="center">
@@ -107,7 +107,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-09)* | 2.7.6 | v1.15.1 | 1.16.1 | v2.1.1 |
+| Latest version *(2026-09)* | 2.7.7 | v1.15.1 | 1.16.1 | v2.1.1 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -149,8 +149,11 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
+**What's new in 2.7.7?**
+Install the Flipper app **2.7.7** from [GitHub Releases](../../releases). A long Wi-Fi name scrolls on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement; broadcasting it needs a later board firmware, and this release does not reflash the board. Firmware stays 2.7.3.
+
 **What's new in 2.7.6?**
-Install the Flipper app **2.7.6** from [GitHub Releases](../../releases). Captures now save under `/ext/apps_data/5ghost_wifi_lab/` (existing files are moved on launch). The About page links to this GitHub repository. Firmware stays 2.7.3 — you do not need to reflash the board.
+Captures save under `/ext/apps_data/5ghost_wifi_lab/` (existing files are moved on launch). The About page links to this GitHub repository. That change is included in 2.7.7; there is no separate 2.7.6 download. Firmware stays 2.7.3.
 
 **What's new in 2.7.4?**
 The Flipper app adds **Guided Audit** on the main menu. Firmware stays 2.7.3 — update the app from [Releases](../../releases); you do not need to reflash the board. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
@@ -209,7 +212,7 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 
 ## Install
 
-1. Download the latest **`.fap`** (**2.7.6**) from [**Releases**](../../releases).
+1. Download the latest **`.fap`** (**2.7.7**) from [**Releases**](../../releases).
 2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
 3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
@@ -223,7 +226,7 @@ The board ships **preloaded**. **Firmware 2.7.3 is enough for Guided Audit** —
 
 Only test networks you **own** or have **written permission** to test.
 
-1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.6** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
+1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.7** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
 2. Wait for the scan if the list is empty. The list is titled **Pick AP (audit)** and includes **both bands**. DFS rows are selectable. **Rescan** repeats the sweep.
 
    ![Pick AP (audit)](assets/screenshots/audit-pick.png)

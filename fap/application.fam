@@ -7,7 +7,7 @@ App(
     entry_point="ghost5_app",
     stack_size=2 * 1024,
     fap_category="GPIO",
-    fap_version="2.7.6",
+    fap_version="2.7.7",
     fap_icon="ghost_icon.png",  # 5Ghost brand icon (task17)
     fap_description="Companion app for the 5Ghost BW16 dual-band Wi-Fi module",
     fap_author="PINGEQUA",

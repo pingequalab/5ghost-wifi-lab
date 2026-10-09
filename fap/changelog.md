@@ -1,3 +1,6 @@
+v2.7.7:
+Long Wi-Fi names scroll on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement. Replaying it needs a later board firmware; this app does not update the board. Firmware stays 2.7.3.
+
 v2.7.6:
 App data is stored under the 5ghost_wifi_lab folder on the SD card. Existing files from the previous 5ghost folder are moved on launch. The About page links to the public GitHub repository.
 
