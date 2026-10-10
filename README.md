@@ -149,11 +149,14 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
+**Board firmware 2.7.4**
+Replays one saved BLE advertisement. The Flipper app stays **2.7.8**. On board firmware 2.7.3 the replay page says **Firmware too old**. Reflash the board at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost).
+
 **What's new in 2.7.8?**
-Install the Flipper app **2.7.8** from [GitHub Releases](../../releases). **Scan Wi-Fi** opens a menu and does not scan. **Scan now** runs the passive sweep. After that scan, **AP list N** reopens the list. Channel Map, Guided Audit, Handshake, and PMKID are on this menu. Firmware stays 2.7.3.
+Install the Flipper app **2.7.8** from [GitHub Releases](../../releases). **Scan Wi-Fi** opens a menu and does not scan. **Scan now** runs the passive sweep. After that scan, **AP list N** reopens the list. Channel Map, Guided Audit, Handshake, and PMKID are on this menu. That app works on board firmware 2.7.3. Replaying a saved BLE advertisement needs board firmware **2.7.4**.
 
 **What's new in 2.7.7?**
-Install the Flipper app **2.7.7** from [GitHub Releases](../../releases). A long Wi-Fi name scrolls on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement; broadcasting it needs a later board firmware, and this release does not reflash the board. Firmware stays 2.7.3.
+Install the Flipper app **2.7.7** from [GitHub Releases](../../releases). A long Wi-Fi name scrolls on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement. Replaying it needs board firmware **2.7.4**. This app release does not reflash the board.
 
 **What's new in 2.7.6?**
 Captures save under `/ext/apps_data/5ghost_wifi_lab/` (existing files are moved on launch). The About page links to this GitHub repository. That change is included in 2.7.7; there is no separate 2.7.6 download. Firmware stays 2.7.3.
@@ -219,7 +222,7 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
 3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
-The board ships **preloaded**. **Firmware 2.7.3 is enough for Guided Audit** — you do not need to reflash the board for this app. Need to recover a board, or you are still on firmware 2.7.1? Use the browser flasher at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost) (picker stays **2.7.3**).
+The board ships **preloaded**. **Firmware 2.7.3 is enough for Guided Audit**. Replaying a saved BLE advertisement needs board firmware **2.7.4**. Recover a board, or move it to 2.7.4, at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost) (picker **2.7.4**).
 
 ---
 
@@ -339,9 +342,9 @@ Saving uses this app (2.7.7 or later). It does not need new board firmware.
 2. **OK** on a device, then **Right** for the raw bytes.
 3. **OK** saves. The screen says **Saved**. The file is `/ext/apps_data/5ghost_wifi_lab/bleadv.txt`.
 
-To replay later: **BLE → Saved**, pick one entry, then **30 / 60 / 120** seconds. **Back** leaves Replay TX and stops the broadcast.
+To replay later: **BLE → Saved**, pick one entry, then **30 / 60 / 120** seconds. The board sends those saved bytes from its own address and does not accept a connection. **Back** leaves Replay TX and stops the broadcast.
 
-Public board firmware is still **2.7.3**, which cannot replay. That page shows **Firmware too old**. Replay waits for a later board firmware. This app update does not reflash the board.
+Replay needs board firmware **2.7.4**. On **2.7.3** that page shows **Firmware too old**. Reflash at [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). Saving still works on 2.7.3, and the app does not reflash the board.
 
 ## How to spoof an iBeacon
 
@@ -385,7 +388,7 @@ iOS usually auto-opens the portal. Android may need an HTTP page if Private DNS 
 
 ### Missing menu items
 
-If **Guided Audit** is missing under **Scan Wi-Fi**, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Handshake** / **PMKID** / **Guided Audit** are all missing there, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.3**.
+If **Guided Audit** is missing under **Scan Wi-Fi**, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Handshake** / **PMKID** / **Guided Audit** are all missing there, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.4**.
 
 ---
 
