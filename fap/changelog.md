@@ -1,3 +1,6 @@
+v2.7.8:
+Scan Wi-Fi opens a menu and does not scan. Scan now runs the sweep. Channel Map, Guided Audit, Handshake, and PMKID are on that menu. Firmware stays 2.7.3.
+
 v2.7.7:
 Long Wi-Fi names scroll on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement. Replaying it needs a later board firmware; this app does not update the board. Firmware stays 2.7.3.
 

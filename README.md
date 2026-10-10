@@ -10,7 +10,7 @@
   <img alt="Bands: 2.4 + 5 GHz" src="https://img.shields.io/badge/Wi--Fi-2.4%20%2B%205%20GHz-ff6b00">
   <img alt="Firmware: Official · Momentum · Unleashed" src="https://img.shields.io/badge/Firmware-Official%20%C2%B7%20Momentum%20%C2%B7%20Unleashed-44a8b3">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Version 2.7.7" src="https://img.shields.io/badge/app-v2.7.7-555">
+  <img alt="Version 2.7.8" src="https://img.shields.io/badge/app-v2.7.8-555">
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ Almost every Flipper Wi-Fi add-on is built on an **ESP32**, and the common ESP32
 - 🛰️ **Real 5 GHz.** Scan, capture handshakes, and map congestion on the 5 GHz band that 2.4-only tools simply can't see.
 - 🛡️ **PMF / WPA3-aware.** It flags 802.11w (Protected Management Frames) and WPA3 APs — the ones that *ignore* deauth — so you stop wasting time on dead ends.
 - 🧭 **Guided Audit.** Pick an AP and wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. **Complete** only if a quality-gated PCAP or `.22000` file was written; DFS stays receive-only.
-- 🤝 **Manual captures when you want them.** Capture Handshake (5 GHz EAPOL) and Capture PMKID *(beta)* stay on the menu for a single path you pick yourself.
+- 🤝 **Manual captures when you want them.** Handshake (5 GHz EAPOL) and PMKID *(beta)* stay under **Scan Wi-Fi** for a single path you pick yourself.
 - 📻 **BLE a bare Flipper can't do.** The Flipper's own firmware never exposes a general BLE scanner to apps; the BW16 radio lists advertisers, flags trackers across all four big ecosystems (AirTag, Tile, Samsung SmartTag, Google Find My) and nearby Flipper Zeros, names vendors — then goes active with GATT service discovery, iBeacon broadcast, and a BLE HID keyboard.
 - 🎛️ **One clean app, three firmwares.** Purpose-built UI for the 128×64 screen, and one build runs on Official, Momentum, and Unleashed.
 
@@ -87,9 +87,9 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 ## Screens
 
-| Home — recon | Home — capture |
+| Home — recon | Scan Wi-Fi — tools |
 |:---:|:---:|
-| ![Home menu — Scan, BLE, iBeacon, BadBLE](assets/screenshots/home.png) | ![Home menu — Channel Map, Guided Audit, Handshake, PMKID](assets/screenshots/home-capture.png) |
+| ![Home menu — Scan Wi-Fi, BLE, iBeacon, BadBLE](assets/screenshots/home.png) | ![Scan Wi-Fi tools — Channel Map, Guided Audit, Handshake, PMKID. This shot is the pre-2.7.8 home page; 2.7.8 keeps these four under Scan Wi-Fi.](assets/screenshots/home-capture.png) |
 | **Scan** | **AP detail** |
 | ![Scan list — lock, SSID, RSSI, mesh markers](assets/screenshots/scan-list.png) | ![AP detail — encryption, channel, band, MAC + Edit / Deauth / Evil](assets/screenshots/ap-detail.png) |
 | **Channel Map** | **Guided Audit** |
@@ -107,7 +107,7 @@ The **[5Ghost WiFi Devboard →](https://www.pingequa.com/products/flipper-zero-
 
 | Capability | **5Ghost** (RTL8720DN) | ESP32 Marauder | Bruce | GhostESP |
 |---|:---:|:---:|:---:|:---:|
-| Latest version *(2026-09)* | 2.7.7 | v1.15.1 | 1.16.1 | v2.1.1 |
+| Latest version *(2026-10-10)* | 2.7.8 | v1.18.0 | 1.16.1 | v2.2.1 |
 | Radio | RTL8720DN **dual-band** | ESP32 ¹ | ESP32 ¹ | ESP32 ¹ |
 | **5 GHz** scan | ✅ native | C5 hardware only ¹ | C5, experimental ¹ | C5 hardware only ¹ |
 | 2.4 GHz toolkit | ✅ | ✅ mature | ✅ | ✅ |
@@ -149,6 +149,9 @@ Tools that overpromise waste your time. The straight talk:
 **Can a Flipper Zero do 5 GHz Wi-Fi?**
 Not on its own — the Flipper Zero has no Wi-Fi radio, and the common ESP32 add-on boards (ESP32 / S2 / S3 / C3 / C6) are 2.4 GHz only. 5Ghost adds real 5 GHz by using a dual-band Realtek RTL8720DN (BW16) board instead.
 
+**What's new in 2.7.8?**
+Install the Flipper app **2.7.8** from [GitHub Releases](../../releases). **Scan Wi-Fi** opens a menu and does not scan. **Scan now** runs the passive sweep. After that scan, **AP list N** reopens the list. Channel Map, Guided Audit, Handshake, and PMKID are on this menu. Firmware stays 2.7.3.
+
 **What's new in 2.7.7?**
 Install the Flipper app **2.7.7** from [GitHub Releases](../../releases). A long Wi-Fi name scrolls on the selected scan row and on the access-point detail title. BLE can save one scanned advertisement; broadcasting it needs a later board firmware, and this release does not reflash the board. Firmware stays 2.7.3.
 
@@ -162,10 +165,10 @@ The Flipper app adds **Guided Audit** on the main menu. Firmware stays 2.7.3 —
 Passive scan now covers 2.4 GHz channels 1–13 and 5 GHz 20 MHz channels 36–48, 52–64, 100–144, 149–165, so EU 5 GHz APs on DFS and channel 165 show up in the list. Transmit (deauth / AP / beacon / handshake / PMKID) stays off DFS — those channels are receive-only. Channel 14 is not included (Japan 802.11b-only; EU 2.4 GHz is 1–13). **Update both the board firmware and the Flipper app** — the 2.7.1 app can time out on the longer scan.
 
 **How do I run a guided audit?**
-Open **Guided Audit**, pick an AP, wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Complete only if a quality-gated PCAP or `.22000` file was written. DFS channels are receive-only (Unsupported). Update the Flipper app from GitHub Releases; firmware 2.7.3 is enough. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
+Open **Scan Wi-Fi → Guided Audit**, pick an AP, wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Complete only if a quality-gated PCAP or `.22000` file was written. DFS channels are receive-only (Unsupported). Update the Flipper app from GitHub Releases; firmware 2.7.3 is enough. Full steps: [How to run a guided audit](#how-to-run-a-guided-audit).
 
 **How do I read Channel Map?**
-Open **Channel Map**. Bars are AP counts per channel; Left/Right pans. Footer is **Best 2.4G** (among 1 / 6 / 11) and **5G** (least-busy 5 GHz channel actually seen). Full steps: [How to read Channel Map](#how-to-read-channel-map).
+Open **Scan Wi-Fi → Channel Map**. Bars are AP counts per channel; Left/Right pans. Footer is **Best 2.4G** (among 1 / 6 / 11) and **5G** (least-busy 5 GHz channel actually seen). With no finished scan the screen says to run Scan first. Full steps: [How to read Channel Map](#how-to-read-channel-map).
 
 **How do I deauth more than one AP?**
 In the scan list, **Left** ticks APs (any mix of SSIDs). **Left-long** deauths every ticked AP together. From an AP detail page, **OK** deauths every same-SSID mesh node. Full steps: [How to scan, deauth, and list stations](#how-to-scan-deauth-and-list-stations).
@@ -180,13 +183,13 @@ Open **BadBLE HID**, pick a built-in payload or a `.txt` from the SD card, pick 
 **Send Beacon** only broadcasts names — phones see SSIDs they cannot join. **Create AP** starts a real joinable access point, optionally with a captive portal. Full steps: [How to send beacons vs create an AP](#how-to-send-beacons-vs-create-an-ap).
 
 **How do I capture a WPA handshake / EAPOL?**
-Open **Capture Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost_wifi_lab/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
+Open **Scan Wi-Fi → Handshake**, pick a **5 GHz WPA2** AP, reconnect a client when the screen says so, then Back to save the PCAP under `/ext/apps_data/5ghost_wifi_lab/`. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
 
 **What is clientless PMKID capture?**
 It grabs a WPA/WPA2 PMKID by associating to the AP (AUTHPROBE) instead of waiting for a client's 4-way handshake, then exports a hashcat-mode-22000 file. It's marked **beta** — the capture-to-hash path is verified offline, but live-AP end-to-end validation is ongoing. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
 
 **How do I capture a PMKID?**
-Open **Capture PMKID**, pick a WPA2 AP (any band), wait a few seconds. Only **Valid PMKID** writes a `.22000` file. It is still beta. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
+Open **Scan Wi-Fi → PMKID**, pick a WPA2 AP (any band), wait a few seconds. Only **Valid PMKID** writes a `.22000` file. It is still beta. Full steps: [How to capture handshake and PMKID](#how-to-capture-handshake-and-pmkid).
 
 **Can 5Ghost crack WPA3?**
 No — and neither can any other tool offline. WPA3-SAE is designed so a captured handshake has no offline-crackable hash. 5Ghost detects WPA3 / PMF and tells you it's out of scope rather than pretending otherwise.
@@ -212,7 +215,7 @@ It's a companion app **for Flipper Zero**, designed for the PINGEQUA 5Ghost dual
 
 ## Install
 
-1. Download the latest **`.fap`** (**2.7.7**) from [**Releases**](../../releases).
+1. Download the latest **`.fap`** (**2.7.8**) from [**Releases**](../../releases).
 2. Copy it to your Flipper SD card under `/ext/apps/GPIO/`.
 3. Dock your PINGEQUA 5Ghost board and open **Apps → GPIO → 5Ghost WiFi Lab**.
 
@@ -222,11 +225,11 @@ The board ships **preloaded**. **Firmware 2.7.3 is enough for Guided Audit** —
 
 ## How to run a guided audit
 
-**Start here for a capture.** Pick an AP and wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Capture Handshake and Capture PMKID stay on the menu if you want to run one path yourself — [steps below](#how-to-capture-handshake-and-pmkid).
+**Start here for a capture.** Pick an AP and wait. The app chooses handshake or clientless PMKID from PMF and whether stations are present. Handshake and PMKID stay under Scan Wi-Fi if you want to run one path yourself — [steps below](#how-to-capture-handshake-and-pmkid).
 
 Only test networks you **own** or have **written permission** to test.
 
-1. **Apps → GPIO → 5Ghost WiFi Lab → Guided Audit** (under Channel Map). Needs app **2.7.7** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
+1. **Apps → GPIO → 5Ghost WiFi Lab → Scan Wi-Fi → Guided Audit**. Needs app **2.7.8** from [GitHub Releases](../../releases); firmware **2.7.3** is enough.
 2. Wait for the scan if the list is empty. The list is titled **Pick AP (audit)** and includes **both bands**. DFS rows are selectable. **Rescan** repeats the sweep.
 
    ![Pick AP (audit)](assets/screenshots/audit-pick.png)
@@ -257,7 +260,7 @@ Only test networks you **own** or have **written permission** to test.
 
 This is the stable path.
 
-1. **Apps → GPIO → 5Ghost WiFi Lab → Capture Handshake.**
+1. **Apps → GPIO → 5Ghost WiFi Lab → Scan Wi-Fi → Handshake.**
 2. Wait for the scan. The list is titled **Pick 5G AP (handshake)** — 2.4 GHz rows are hidden because this radio often cannot hear the client's M2/M4 uplink on 2.4 GHz.
 
    ![Pick 5G AP (handshake)](assets/screenshots/handshake-pick.png)
@@ -275,7 +278,7 @@ If nothing lands: no client on the AP, too far, WPA3 / PMF-required, or you left
 
 Still **beta** — the capture-to-hash path is verified; treat live-AP results as experimental.
 
-1. **Apps → GPIO → 5Ghost WiFi Lab → Capture PMKID.**
+1. **Apps → GPIO → 5Ghost WiFi Lab → Scan Wi-Fi → PMKID.**
 2. The list is titled **Pick AP (PMKID)** and includes **both bands**.
 3. Pick a **WPA2-PSK** (or WPA2/WPA3 transition) AP. Pure WPA3-SAE has no offline-crackable hash.
 4. Leave it. A run finishes in a few seconds. No client needed.
@@ -297,7 +300,7 @@ PMKID does **not** write a PCAP. If you want EAPOL frames in Wireshark, use **Ca
 
 ## How to scan, deauth, and list stations
 
-1. Open **Scan Wi-Fi**. The app runs a passive dual-band sweep, then the list. The selected row scrolls a long name. Any other row that does not fit ends with `...`. Short names and `<hidden>` stay as they are.
+1. Open **Scan Wi-Fi**. This menu does not scan. **Scan now** runs a passive dual-band sweep, then the list. After that scan, **AP list N** reopens the same list and does not scan. The selected row scrolls a long name. Any other row that does not fit ends with `...`. Short names and `<hidden>` stay as they are.
 2. **OK** opens AP detail (encryption, channel, band, MAC, vendor when known). The detail title scrolls when the name does not fit.
 3. On the detail page: **Left** = Edit attack options · **OK** = Deauth / Stop (every same-SSID mesh node) or **RX only** on DFS · **Right** = Evil Portal on that AP · **Down** = station list (`STASCAN`).
 4. On the station list, **OK** deauths **that one client** (not a broadcast). DFS is still receive-only.
@@ -307,9 +310,9 @@ PMF-required / WPA3 APs ignore deauth. The app flags them instead of failing sil
 
 ## How to read Channel Map
 
-Uses the last **Scan Wi-Fi** list (no extra radio command).
+Uses the last finished **Scan Wi-Fi** list (no extra radio command). With no finished scan the screen says to run Scan first.
 
-1. Open **Channel Map**. Header is AP count. Each bar is how many APs sit on that channel.
+1. Open **Scan Wi-Fi → Channel Map**. Header is AP count. Each bar is how many APs sit on that channel.
 2. **Left / Up** pans toward 2.4 GHz; **Right / Down** pans into 5 GHz (`>` when more channels are off-screen).
 3. Footer: **Best 2.4G** among channels **1 / 6 / 11** (fewest overlapping neighbours); **5G** is the least-busy 5 GHz channel **actually seen**.
 4. DFS channels can appear here (receive-only). Transmit tools will not use them.
@@ -330,7 +333,7 @@ GATT needs a connectable peripheral. `Not connectable` / `Discovery timeout` mea
 
 ## How to save a BLE advertisement
 
-Saving uses app **2.7.7**. It does not need new board firmware.
+Saving uses this app (2.7.7 or later). It does not need new board firmware.
 
 1. Open **BLE → Scan nearby** and wait for the list. **Nearby n** reopens that list.
 2. **OK** on a device, then **Right** for the raw bytes.
@@ -382,7 +385,7 @@ iOS usually auto-opens the portal. Android may need an HTTP page if Private DNS 
 
 ### Missing menu items
 
-If **Guided Audit** is missing, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Capture Handshake** / **Capture PMKID** / **Guided Audit** are all missing, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.3**.
+If **Guided Audit** is missing under **Scan Wi-Fi**, the Flipper is still on app 2.7.3 or older — install the `.fap` from [Releases](../../releases). If **Handshake** / **PMKID** / **Guided Audit** are all missing there, reflash the board from [flash.pingequa.com](https://flash.pingequa.com/devices/bw16-5ghost). If **iBeacon Spoof** / **BadBLE HID** / **BLE** / **Create AP** are missing, the board firmware is too old — same flasher, picker **2.7.3**.
 
 ---
 

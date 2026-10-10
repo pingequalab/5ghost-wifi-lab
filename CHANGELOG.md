@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [2.7.8] — 2026-10-10
+
+> Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.
+
+### Changed
+- **Scan Wi-Fi** opens a menu and does not scan. **Scan now** runs the passive
+  dual-band sweep, then the AP list. After that scan finishes, **AP list N**
+  reopens the same list.
+- Channel Map, Guided Audit, Handshake, and PMKID are on that menu. Back returns
+  to the row that opened them. Opening Scan Wi-Fi from the home screen starts
+  on Scan now.
+- Channel Map still does not scan by itself. With no finished scan it says to
+  run Scan first.
+
 ## [2.7.7] — 2026-10-09
 
 > Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.

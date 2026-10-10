@@ -37,7 +37,7 @@
 // 5Ghost branding / update detection (task11). Keep GHOST_APP_VERSION in sync with
 // fap_version in application.fam. GHOST_LATEST_FW is the newest BW16 firmware the FAP
 // knows about; an official module reporting an older fw triggers the update hint.
-#define GHOST_APP_VERSION "2.7.7"
+#define GHOST_APP_VERSION "2.7.8"
 #define GHOST_LATEST_FW   "2.7.3" // board firmware; FAP-only bump must not lockstep this
 #define GHOST_BRAND_URL   "github.com/pingequalab/5ghost-wifi-lab"
 
@@ -93,9 +93,20 @@ typedef enum {
     badbleRunScene,        // 5Ghost ⑧b: send BADBLE, show CCCD-gated injection progress, OK=restart
     auditSelectScene,      // P1 Guided Audit: pick AP from cached LISTAP (no TX in A1)
     auditRunScene,         // P1 Guided Audit: run/result on one widget (A1 shell, no UART)
+    wifiMenuScene,         // Scan Wi-Fi hub. Does not scan. Scan now / AP list / map / audit / captures.
 
     Ghost5SceneCount
 } Ghost5Scene;
+
+// Item ids for the Scan Wi-Fi hub. submenu_set_selected_item matches these, not the visual row.
+enum {
+    WifiHubScan = 0,
+    WifiHubList = 1,
+    WifiHubMap = 2,
+    WifiHubAudit = 3,
+    WifiHubHandshake = 4,
+    WifiHubPmkid = 5,
+};
 
 //Vistas APP
 typedef enum {
@@ -404,6 +415,8 @@ typedef struct Ghost5App {
     // 5Ghost task9: SD export state
     bool scan_exported; // CSV written once per fresh scan
     bool scan_timed_out; // last LISTAP returned no SCAN:OK in time (module not responding)
+    bool wifi_sweep_done; // this session received SCAN:OK, including 0 APs. Timeout does not set it.
+    uint32_t wifi_hub_sel; // hub row to restore after a child scene. Home entry resets it to Scan now.
     volatile bool phtml_ok; // task10: firmware ACKed a custom-portal upload (PHTMLOK)
     bool custom_portal_ready; // true only after this app session uploads every chunk with ACK
     bool custom_portal_load_failed; // distinguishes an upload/read failure from never selected
@@ -1378,20 +1391,15 @@ typedef struct {
     char required_cap; // 0 = always shown; else gated on this caps bit
 } HomeItem;
 
-// Ordering = recon-first, moat-forward (user product call 2026-07-01): passive recon at the
-// top (Scan / BLE / Channel), active/attack below (Handshake / Beacon / AP), About last.
-// BLE Scan is a moat feature (bare Flipper can't scan BLE) so it's promoted to row 2.
+// Ordering = recon-first. Scan Wi-Fi opens a hub (it does not scan by itself). Channel Map,
+// Guided Audit, Handshake and PMKID live in that hub because they all read one LISTAP table.
+// Send Beacon and Create AP stay here: they do not read that table.
 // Order is display-only: input dispatch keys off HomeItem.target, not array index — safe to reorder.
-// Scan + List merged into one "Scan Wi-Fi" (scans, then goes straight to the results list).
 static const HomeItem home_items[] = {
     {"Scan Wi-Fi", ScanWifi, 0},
     {"BLE", BleScan, 'L'}, // detector + saved-advert replay; hidden unless caps 'L'
     {"iBeacon Spoof", IBeaconSpoof, 'I'}, // ⑦b: broadcast a custom iBeacon; hidden unless caps 'I'
     {"BadBLE HID", BadBleHid, 'K'}, // ⑧b: BLE HID keystroke injection; hidden unless caps 'K'
-    {"Channel Map", ChannelAnalyzer, 0},
-    {"Guided Audit", GuidedAudit, 'H'},
-    {"Capture Handshake", CaptureHandshake, 'H'},
-    {"Capture PMKID", CapturePmkid, 'H'},
     {"Send Beacon", CustomBeacon, 0},
     {"Create AP", CreateAP, 'E'}, // P4 BP-7: evil/AP needs E cap (P3); hidden under DSB fw
     {"About 5Ghost", Help, 0},
@@ -1517,7 +1525,8 @@ static bool ghost_home_input_callback(InputEvent* event, void* context) {
         app->home_target = home_items[vis[sel]].target;
         switch(home_items[vis[sel]].target) {
         case ScanWifi:
-            scene_manager_next_scene(app->scene_manager, scanNetworksScene);
+            app->wifi_hub_sel = WifiHubScan;
+            scene_manager_next_scene(app->scene_manager, wifiMenuScene);
             break;
         case ChannelAnalyzer:
             scene_manager_next_scene(app->scene_manager, channelAnalyzerScene);
@@ -1659,11 +1668,21 @@ void main_menu_scene_on_exit(void* context) {
     Ghost5App* app = context;
     furi_timer_stop(app->splash_timer);
 }
+// A new LISTAP frees the table, so the hub must not offer "AP list" until SCAN:OK.
+static void ghost_wifi_sweep_begin(Ghost5App* app) {
+    app->wifi_sweep_done = false;
+}
+
+static void ghost_wifi_sweep_finish(Ghost5App* app) {
+    app->wifi_sweep_done = (scanFinish == true);
+}
+
 void scan_networks_scene_on_enter(void* context) {
     FURI_LOG_D(TAG, __func__);
 
     Ghost5App* app = context;
     app->menuIndex = 0;
+    ghost_wifi_sweep_begin(app);
     for(int i = 0; i < app->wifiCount; i++) {
         free(app->wifiList[i].APssid);
     }
@@ -1695,9 +1714,9 @@ void scan_networks_scene_on_enter(void* context) {
     // 5Ghost task26: if SCAN:OK never came back the module isn't responding. Record it so
     // List Wifis can show timeout copy instead of a silent empty list. Not a 5V sensor.
     app->scan_timed_out = (scanFinish == false);
+    ghost_wifi_sweep_finish(app);
 
-    // Scan+List merged: go straight to the results list. Back from the list skips this
-    // loading/scan scene back to the home menu (see list_networks_scene_on_event).
+    // Straight to the results list. Back from the list skips this scene and returns to the hub.
     scene_manager_next_scene(app->scene_manager, listNetworksScene);
 }
 bool scan_networks_scene_on_event(void* context, SceneManagerEvent event) {
@@ -1841,15 +1860,17 @@ static void ghost_list_draw_callback(Canvas* canvas, void* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(!app || app->wifiCount <= 0) {
-        const char* main_s;
-        const char* sub_s;
-        ghost_uart_empty_copy(
-            app,
-            app && app->scan_timed_out,
-            "No APs found",
-            "Press OK to scan",
-            &main_s,
-            &sub_s);
+        // Wi-Fi list only. STA still uses ghost_uart_empty_copy and its "OK=retry" line.
+        const char* main_s = "No APs found";
+        const char* sub_s = "Right: scan";
+        if(app && app->uart_port_busy) {
+            main_s = "USART busy";
+            sub_s = "Listen UART=None";
+        } else if(app && app->scan_timed_out && app->fw_status == FwNoModule) {
+            main_s = "No UART reply";
+        } else if(app && app->scan_timed_out) {
+            main_s = "No response";
+        }
         ghost_ui_header(canvas, "Scan", NULL);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, main_s);
@@ -1974,13 +1995,13 @@ static bool ghost_list_input_callback(InputEvent* event, void* context) {
        event->type != InputTypeLong)
         return false;
 
-    // empty/timeout state: OK re-runs the passive scan (task26 one-tap retry).
+    // Empty list: Right starts a sweep. OK does nothing. Back falls through to the scene.
     if(app->wifiCount <= 0) {
-        if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        if(event->key == InputKeyRight && event->type == InputTypeShort) {
             scene_manager_next_scene(app->scene_manager, scanNetworksScene);
             return true;
         }
-        return false; // Back -> dispatcher -> previous scene
+        return false;
     }
 
     // MULTI-AP C2: while a multi-deauth round is running the list doubles as the running banner.
@@ -2040,9 +2061,7 @@ static bool ghost_list_input_callback(InputEvent* event, void* context) {
         return false; // Left repeat -> ignore (no double-fire)
     }
 
-    // Right = re-scan in place (R1): refresh the list without Back -> home ->
-    // Scan Wi-Fi. The merged "Scan Wi-Fi" is the only scan entry point, so this
-    // gives a one-key refresh from within the results. See UI_SCAN_LIST_MERGE_ANALYSIS.md.
+    // Right = clear and LISTAP again. Back from the new list returns to the Scan Wi-Fi hub.
     if(event->key == InputKeyRight && event->type == InputTypeShort) {
         scene_manager_next_scene(app->scene_manager, scanNetworksScene);
         return true;
@@ -2172,8 +2191,8 @@ bool list_networks_scene_on_event(void* context, SceneManagerEvent event) {
     FURI_LOG_D(TAG, __func__);
     Ghost5App* app = context;
     if(event.type == SceneManagerEventTypeBack) {
-        // skip the loading/scan scene underneath us — go straight back to the home menu
-        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, mainMenuScene);
+        // Skip the scan scene under this list. previous_scene would re-enter it and LISTAP again.
+        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, wifiMenuScene);
         return true;
     }
     if(event.type == SceneManagerEventTypeCustom) {
@@ -3693,6 +3712,7 @@ static void handshake_build_menu(Ghost5App* app);
 static void handshake_scan_aps(Ghost5App* app) {
     view_dispatcher_switch_to_view(app->view_dispatcher, loadingView);
 
+    ghost_wifi_sweep_begin(app);
     for(int i = 0; i < app->wifiCount; i++) {
         free(app->wifiList[i].APssid);
     }
@@ -3710,6 +3730,7 @@ static void handshake_scan_aps(Ghost5App* app) {
         times++;
     }
     notification_message(app->notif, &sequence_reset_blue); // 5Ghost task8: LED off when sweep ends
+    ghost_wifi_sweep_finish(app);
 }
 
 // Build the picker submenu from the current app->wifiList (5G only) with a Rescan row on top,
@@ -3778,8 +3799,8 @@ static void handshake_ap_item_callback(void* context, uint32_t index) {
     scene_manager_next_scene(app->scene_manager, handshakeCaptureScene);
 }
 
-// Select scene: reuse the cached AP list when returning from a capture (app->ap_reuse) so the
-// picker opens instantly; otherwise sweep fresh (fresh entry from the main menu, or empty cache).
+// Capture Back sets ap_reuse and reopens this picker. A finished SCAN:OK opens the same
+// cache after one STOP. Otherwise this scene runs its own LISTAP.
 void handshake_select_scene_on_enter(void* context) {
     FURI_LOG_D(TAG, __func__);
     Ghost5App* app = context;
@@ -3790,6 +3811,14 @@ void handshake_select_scene_on_enter(void* context) {
         return;
     }
     app->ap_reuse = false;
+    if(app->wifi_sweep_done) {
+        // LISTAP used to tear down ATTACK. Opening the cache must still stop a client deauth.
+        if(app->uart_helper && !app->uart_port_busy) {
+            uart_helper_send(app->uart_helper, "STOP\n", 5);
+        }
+        handshake_build_menu(app);
+        return;
+    }
     handshake_scan_aps(app);
     handshake_build_menu(app);
 }
@@ -4002,6 +4031,7 @@ static void pmkid_build_menu(Ghost5App* app);
 static void pmkid_scan_aps(Ghost5App* app) {
     view_dispatcher_switch_to_view(app->view_dispatcher, loadingView);
 
+    ghost_wifi_sweep_begin(app);
     for(int i = 0; i < app->wifiCount; i++) {
         free(app->wifiList[i].APssid);
     }
@@ -4018,6 +4048,7 @@ static void pmkid_scan_aps(Ghost5App* app) {
         times++;
     }
     notification_message(app->notif, &sequence_reset_blue);
+    ghost_wifi_sweep_finish(app);
 }
 
 // Build the picker submenu from the current app->wifiList (all bands) with a Rescan row on top.
@@ -4074,8 +4105,8 @@ static void pmkid_ap_item_callback(void* context, uint32_t index) {
     scene_manager_next_scene(app->scene_manager, pmkidCaptureScene);
 }
 
-// Select scene: reuse the cached AP list when returning from a capture (app->ap_reuse) so the
-// picker opens instantly; otherwise sweep fresh (fresh entry from the main menu, or empty cache).
+// Capture Back sets ap_reuse and reopens this picker. A finished SCAN:OK opens the same
+// cache after one STOP. Otherwise this scene runs its own LISTAP.
 void pmkid_select_scene_on_enter(void* context) {
     FURI_LOG_D(TAG, __func__);
     Ghost5App* app = context;
@@ -4086,6 +4117,13 @@ void pmkid_select_scene_on_enter(void* context) {
         return;
     }
     app->ap_reuse = false;
+    if(app->wifi_sweep_done) {
+        if(app->uart_helper && !app->uart_port_busy) {
+            uart_helper_send(app->uart_helper, "STOP\n", 5);
+        }
+        pmkid_build_menu(app);
+        return;
+    }
     pmkid_scan_aps(app);
     pmkid_build_menu(app);
 }
@@ -6218,6 +6256,7 @@ static void audit_clear_wifi_list(Ghost5App* app) {
 static void audit_start_listap(Ghost5App* app) {
     view_dispatcher_switch_to_view(app->view_dispatcher, loadingView);
     audit_clear_wifi_list(app);
+    ghost_wifi_sweep_begin(app);
     scanFinish = false;
     app->scan_timed_out = false;
     uart_helper_send(app->uart_helper, "LISTAP\n", 7);
@@ -6458,7 +6497,7 @@ static void audit_ap_item_callback(void* context, uint32_t index) {
 void audit_select_scene_on_enter(void* context) {
     Ghost5App* app = context;
     app->menuIndex = 0;
-    if(app->wifiCount > 0) {
+    if(app->wifi_sweep_done) {
         audit_build_menu(app);
         return;
     }
@@ -6477,6 +6516,7 @@ bool audit_select_scene_on_event(void* context, SceneManagerEvent event) {
         if(scanFinish) {
             audit_timer_stop(app);
             app->scan_timed_out = false;
+            ghost_wifi_sweep_finish(app);
             audit_build_menu(app);
             return true;
         }
@@ -6484,6 +6524,7 @@ bool audit_select_scene_on_event(void* context, SceneManagerEvent event) {
         if(app->audit_wait_ticks == 0) {
             audit_timer_stop(app);
             app->scan_timed_out = true;
+            ghost_wifi_sweep_finish(app);
             audit_build_menu(app);
         }
         return true;
@@ -6688,6 +6729,70 @@ void audit_run_scene_on_exit(void* context) {
     widget_reset(app->widget);
 }
 
+// Scan Wi-Fi hub. Scan now is the only row that starts a sweep from here.
+// AP list appears only after SCAN:OK. The other rows open tools on that table.
+static void wifi_menu_cb(void* context, uint32_t index) {
+    Ghost5App* app = context;
+    Ghost5Scene dest = wifiMenuScene;
+    switch(index) {
+    case WifiHubScan:
+        dest = scanNetworksScene;
+        break;
+    case WifiHubList:
+        dest = listNetworksScene;
+        break;
+    case WifiHubMap:
+        dest = channelAnalyzerScene;
+        break;
+    case WifiHubAudit:
+        dest = auditSelectScene;
+        break;
+    case WifiHubHandshake:
+        dest = handshakeSelectScene;
+        break;
+    case WifiHubPmkid:
+        dest = pmkidSelectScene;
+        break;
+    default:
+        return;
+    }
+    app->wifi_hub_sel = index;
+    scene_manager_next_scene(app->scene_manager, dest);
+}
+
+void wifi_menu_scene_on_enter(void* context) {
+    Ghost5App* app = context;
+    submenu_reset(app->submenu);
+    submenu_set_header(app->submenu, "Scan Wi-Fi");
+    submenu_add_item(app->submenu, "Scan now", WifiHubScan, wifi_menu_cb, app);
+    if(app->wifi_sweep_done) {
+        // Submenu keeps this pointer. GUI thread only, same pattern as the BLE hub.
+        static char ap_list_label[24];
+        snprintf(ap_list_label, sizeof(ap_list_label), "AP list %d", app->wifiCount);
+        submenu_add_item(app->submenu, ap_list_label, WifiHubList, wifi_menu_cb, app);
+    }
+    submenu_add_item(app->submenu, "Channel Map", WifiHubMap, wifi_menu_cb, app);
+    if(fw_has_cap(app, 'H')) {
+        submenu_add_item(app->submenu, "Guided Audit", WifiHubAudit, wifi_menu_cb, app);
+        submenu_add_item(app->submenu, "Handshake", WifiHubHandshake, wifi_menu_cb, app);
+        submenu_add_item(app->submenu, "PMKID", WifiHubPmkid, wifi_menu_cb, app);
+    }
+    // Home entry sets this to Scan now. A child Back keeps the row that opened it.
+    // A missing id (AP list hidden after a failed rescan) leaves the cursor on row 0.
+    submenu_set_selected_item(app->submenu, app->wifi_hub_sel);
+    view_dispatcher_switch_to_view(app->view_dispatcher, beaconListView);
+}
+
+bool wifi_menu_scene_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+
+void wifi_menu_scene_on_exit(void* context) {
+    UNUSED(context);
+}
+
 void (*const Ghost5App_scene_on_enter_handlers[])(void*) = {
     splash_scene_on_enter,
     main_menu_scene_on_enter,
@@ -6729,7 +6834,8 @@ void (*const Ghost5App_scene_on_enter_handlers[])(void*) = {
     badble_file_scene_on_enter,
     badble_run_scene_on_enter,
     audit_select_scene_on_enter,
-    audit_run_scene_on_enter};
+    audit_run_scene_on_enter,
+    wifi_menu_scene_on_enter};
 
 bool (*const Ghost5App_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     splash_scene_on_event,
@@ -6772,7 +6878,8 @@ bool (*const Ghost5App_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     badble_file_scene_on_event,
     badble_run_scene_on_event,
     audit_select_scene_on_event,
-    audit_run_scene_on_event};
+    audit_run_scene_on_event,
+    wifi_menu_scene_on_event};
 
 void (*const Ghost5App_scene_on_exit_handlers[])(void*) = {
     splash_scene_on_exit,
@@ -6815,7 +6922,8 @@ void (*const Ghost5App_scene_on_exit_handlers[])(void*) = {
     badble_file_scene_on_exit,
     badble_run_scene_on_exit,
     audit_select_scene_on_exit,
-    audit_run_scene_on_exit};
+    audit_run_scene_on_exit,
+    wifi_menu_scene_on_exit};
 
 static const SceneManagerHandlers Ghost5App_scene_manager_handlers = {
     .on_enter_handlers = Ghost5App_scene_on_enter_handlers,
@@ -7340,6 +7448,8 @@ static Ghost5App* app_alloc() {
     app->gatt_timed_out = false;
     app->scan_exported = false;
     app->scan_timed_out = false;
+    app->wifi_sweep_done = false;
+    app->wifi_hub_sel = WifiHubScan;
     app->phtml_ok = false;
     app->custom_portal_ready = false;
     app->custom_portal_load_failed = false;
