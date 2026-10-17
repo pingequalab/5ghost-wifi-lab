@@ -37,8 +37,8 @@
 // 5Ghost branding / update detection (task11). Keep GHOST_APP_VERSION in sync with
 // fap_version in application.fam. GHOST_LATEST_FW is the newest BW16 firmware the FAP
 // knows about; an official module reporting an older fw triggers the update hint.
-#define GHOST_APP_VERSION "2.8.0"
-#define GHOST_LATEST_FW   "2.7.3" // board firmware; FAP-only bump must not lockstep this
+#define GHOST_APP_VERSION "2.8.1"
+#define GHOST_LATEST_FW   "2.7.4" // board firmware; FAP-only bump must not lockstep this
 #define GHOST_BRAND_URL   "github.com/pingequalab/5ghost-wifi-lab"
 
 #define WEP_ENABLED      0x0001
