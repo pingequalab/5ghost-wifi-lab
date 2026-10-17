@@ -1,8 +1,5 @@
-v2.8.1:
-Latest board firmware is 2.7.4. An official module on older firmware, including 2.7.3, shows the update hint. API 88.2 for Official 1.5.1. v2.7.8 stays the API 87.1 package for Official 1.4.3 and Momentum mntm-012.
-
 v2.8.0:
-Official 1.5.1 build, API 88.2. v2.7.8 stays the API 87.1 package for Official 1.4.3 and Momentum mntm-012. Unleashed unlshd-094 matches API major in source and was not loaded on a device. Firmware stays 2.7.3.
+Official 1.5.1 build, API 88.2. v2.7.8 stays the API 87.1 package for Official 1.4.3 and Momentum mntm-012. Unleashed unlshd-094 matches API major in source and was not loaded on a device. Latest board firmware is 2.7.4. An official module on older firmware, including 2.7.3, shows the update hint.
 
 v2.7.8:
 Scan Wi-Fi opens a menu and does not scan. Scan now runs the sweep. Channel Map, Guided Audit, Handshake, and PMKID are on that menu. Firmware stays 2.7.3.
