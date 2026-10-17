@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.8.1] — 2026-10-17
+
+> Flipper app only. Latest board firmware is **2.7.4**. This app does not reflash the board.
+
+### Changed
+- `GHOST_LATEST_FW` is **2.7.4**, the latest public BW16 firmware. An official module reporting an older version, including **2.7.3**, shows the update hint: home header `Official !`, About page `>2.7.4 upd`. **2.7.4** shows `newest`.
+- Still the Official Flipper **1.5.1** package, API **88.2**. **v2.7.8** stays the API **87.1** package for Official **1.4.3** and Momentum **mntm-012**.
+
 ## [2.8.0] — 2026-10-17
 
 > Flipper app only. Board firmware stays **2.7.3** — you do not need to reflash the board.
