@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [2.8.1] — 2026-10-19
+
+> Flipper app only. Same API **88.2** / Official **1.5.1**. Latest board firmware stays **2.7.4**. This app does not reflash the board. **v2.7.8** stays the API **87.1** package.
+
+### Fixed
+- **#8** Handshake / PMKID AP pickers: cursor uses the submenu item id (not the visual row) and restores the selected AP when you go back.
+- **#9** Scan AP list wraps at both ends, like the home menu.
+- **#10** Long SSID marquee is slower and pauses at both ends.
+- **#13** New captures go under type folders (`scans`, `handshakes`, `pmkid`, `audits`, `creds`, `ble`) with a sanitized SSID in target filenames when possible. Existing flat files stay where they are.
+- **#16** PMKID picker sorts by signal like the main Scan list. Whole-list automatic PMKID scan is not included.
+
 ## [2.8.0] — 2026-10-17
 
 > Flipper app only. Latest board firmware is **2.7.4**. This app does not reflash the board.

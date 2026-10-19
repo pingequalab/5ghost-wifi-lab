@@ -1,3 +1,6 @@
+v2.8.1:
+Same Official 1.5.1 build, API 88.2. Handshake and PMKID pickers use the submenu item id and restore the selected AP (#8). Scan AP list wraps at both ends (#9). Long SSID marquee is slower and pauses at both ends (#10). New captures go under type folders (scans, handshakes, pmkid, audits, creds, ble) with a sanitized SSID in the filename when possible; existing flat files stay where they are (#13). PMKID picker sorts by signal (#16). Whole-list automatic PMKID scan is not included. Latest board firmware stays 2.7.4. v2.7.8 stays the API 87.1 package.
+
 v2.8.0:
 Official 1.5.1 build, API 88.2. v2.7.8 stays the API 87.1 package for Official 1.4.3 and Momentum mntm-012. Unleashed unlshd-094 matches API major in source and was not loaded on a device. Latest board firmware is 2.7.4. An official module on older firmware, including 2.7.3, shows the update hint.
 
