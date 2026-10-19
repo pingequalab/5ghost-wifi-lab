@@ -3741,8 +3741,10 @@ static void handshake_build_menu(Ghost5App* app) {
     submenu_set_header(app->submenu, "Pick 5G AP (handshake)");
     // Row 0 = Rescan (sentinel id); real AP rows follow at positions 1..N.
     submenu_add_item(app->submenu, "Rescan", GHOST_AP_RESCAN_ID, handshake_ap_item_callback, app);
-    int first_ap_pos = 0; // submenu position of the first AP (0 = none -> cursor stays on Rescan)
-    int pos = 1;          // running submenu position (row 0 is Rescan)
+    // submenu_set_selected_item matches the item id, not the visual row.
+    // Rescan is GHOST_AP_RESCAN_ID; each AP row uses its wifiList index.
+    // Passing visual row 1 selected the AP whose id is 1 (the second AP).
+    int first_ap_id = -1; // wifiList index of the first listed AP; none -> Rescan
     for(int i = 0; i < app->wifiCount; i++) {
         // Handshake capture needs 5GHz (this chip can't hear the client's 2.4G uplink), so list
         // only 5G APs. Dropping the "5G|/2G|" prefix lets the SSID use the full row width — the
@@ -3775,10 +3777,10 @@ static void handshake_build_menu(Ghost5App* app) {
         // item id = real wifiList index (capture scene indexes wifiList by selectedWifi); passing i
         // instead of a running counter keeps the mapping correct after filtering out the 2.4G rows.
         submenu_add_item(app->submenu, temp, i, handshake_ap_item_callback, app);
-        if(first_ap_pos == 0) first_ap_pos = pos;
-        pos++;
+        if(first_ap_id < 0) first_ap_id = i;
     }
-    submenu_set_selected_item(app->submenu, first_ap_pos); // land on the first AP, not Rescan
+    submenu_set_selected_item(
+        app->submenu, first_ap_id >= 0 ? (uint32_t)first_ap_id : GHOST_AP_RESCAN_ID);
     view_dispatcher_switch_to_view(app->view_dispatcher, scannedWifisView);
 }
 
@@ -3808,6 +3810,12 @@ void handshake_select_scene_on_enter(void* context) {
     if(app->ap_reuse && app->wifiCount > 0) {
         app->ap_reuse = false;
         handshake_build_menu(app);
+        // Back from capture: re-select the AP already stored in selectedWifi.
+        // Only 5 GHz rows are in this menu, so a filtered-out index stays on the first AP.
+        if(app->selectedWifi >= 0 && app->selectedWifi < app->wifiCount &&
+           app->wifiList[app->selectedWifi].channel > 14) {
+            submenu_set_selected_item(app->submenu, (uint32_t)app->selectedWifi);
+        }
         return;
     }
     app->ap_reuse = false;
@@ -4058,8 +4066,10 @@ static void pmkid_build_menu(Ghost5App* app) {
     submenu_set_header(app->submenu, "Pick AP (PMKID)");
     // Row 0 = Rescan (sentinel id); real AP rows follow at positions 1..N.
     submenu_add_item(app->submenu, "Rescan", GHOST_AP_RESCAN_ID, pmkid_ap_item_callback, app);
-    int first_ap_pos = 0; // submenu position of the first AP (0 = none -> cursor stays on Rescan)
-    int pos = 1;          // running submenu position (row 0 is Rescan)
+    // submenu_set_selected_item matches the item id, not the visual row.
+    // Rescan is GHOST_AP_RESCAN_ID; each AP row uses its wifiList index.
+    // Passing visual row 1 selected the AP whose id is 1 (the second AP).
+    int first_ap_id = -1; // wifiList index of the first listed AP; none -> Rescan
     for(int i = 0; i < app->wifiCount; i++) {
         // PMKID is clientless (the firmware auths itself), so list every band — no 5G filter.
         bool dup = false;
@@ -4081,10 +4091,10 @@ static void pmkid_build_menu(Ghost5App* app) {
             snprintf(temp, sizeof(temp), "%s", ssid);
         }
         submenu_add_item(app->submenu, temp, i, pmkid_ap_item_callback, app);
-        if(first_ap_pos == 0) first_ap_pos = pos;
-        pos++;
+        if(first_ap_id < 0) first_ap_id = i;
     }
-    submenu_set_selected_item(app->submenu, first_ap_pos); // land on the first AP, not Rescan
+    submenu_set_selected_item(
+        app->submenu, first_ap_id >= 0 ? (uint32_t)first_ap_id : GHOST_AP_RESCAN_ID);
     view_dispatcher_switch_to_view(app->view_dispatcher, scannedWifisView);
 }
 
@@ -4114,6 +4124,10 @@ void pmkid_select_scene_on_enter(void* context) {
     if(app->ap_reuse && app->wifiCount > 0) {
         app->ap_reuse = false;
         pmkid_build_menu(app);
+        // Back from capture: re-select the AP already stored in selectedWifi.
+        if(app->selectedWifi >= 0 && app->selectedWifi < app->wifiCount) {
+            submenu_set_selected_item(app->submenu, (uint32_t)app->selectedWifi);
+        }
         return;
     }
     app->ap_reuse = false;
