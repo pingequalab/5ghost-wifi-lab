@@ -2184,13 +2184,14 @@ static bool ghost_list_input_callback(InputEvent* event, void* context) {
         ListModel * m,
         {
             int prev = m->sel;
-            if(event->key == InputKeyUp) {
+            // wifiCount == 0 makes (wifiCount - 1) == -1. Leave sel/top alone.
+            if(app->wifiCount > 0 && event->key == InputKeyUp) {
                 m->sel = (m->sel > 0) ? m->sel - 1 : app->wifiCount - 1;
                 if(m->sel < m->top) m->top = m->sel;
                 if(m->sel >= m->top + GHOST_LIST_ROWS)
                     m->top = m->sel - GHOST_LIST_ROWS + 1;
                 handled = true;
-            } else if(event->key == InputKeyDown) {
+            } else if(app->wifiCount > 0 && event->key == InputKeyDown) {
                 m->sel = (m->sel < app->wifiCount - 1) ? m->sel + 1 : 0;
                 if(m->sel < m->top) m->top = m->sel;
                 if(m->sel >= m->top + GHOST_LIST_ROWS)
