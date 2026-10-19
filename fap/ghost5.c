@@ -2074,12 +2074,16 @@ static bool ghost_list_input_callback(InputEvent* event, void* context) {
         {
             int prev = m->sel;
             if(event->key == InputKeyUp) {
-                if(m->sel > 0) m->sel--;
+                m->sel = (m->sel > 0) ? m->sel - 1 : app->wifiCount - 1;
                 if(m->sel < m->top) m->top = m->sel;
+                if(m->sel >= m->top + GHOST_LIST_ROWS)
+                    m->top = m->sel - GHOST_LIST_ROWS + 1;
                 handled = true;
             } else if(event->key == InputKeyDown) {
-                if(m->sel < app->wifiCount - 1) m->sel++;
-                if(m->sel >= m->top + GHOST_LIST_ROWS) m->top = m->sel - GHOST_LIST_ROWS + 1;
+                m->sel = (m->sel < app->wifiCount - 1) ? m->sel + 1 : 0;
+                if(m->sel < m->top) m->top = m->sel;
+                if(m->sel >= m->top + GHOST_LIST_ROWS)
+                    m->top = m->sel - GHOST_LIST_ROWS + 1;
                 handled = true;
             }
             if(handled && m->sel != prev) m->ssid_px = 0;
