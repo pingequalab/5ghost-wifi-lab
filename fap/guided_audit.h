@@ -8,6 +8,7 @@
 
 #define G5_SESSION_ID_MAX 32
 #define G5_AUDIT_BASENAME_MAX 64
+#define G5_SSID_SLUG_MAX 16
 #define G5_CAPTURE_SCHEMA "5ghost.capture.v1"
 #define G5_AUDIT_SCHEMA "5ghost.audit.v1"
 
@@ -46,6 +47,9 @@ typedef struct {
     const char* pmkid_hex;
     const char* reason;
     bool have_22000;
+    // Exact .22000 basename already chosen for this write. NULL builds one from
+    // session_id + ssid. A value that is not a single safe path segment fails the build.
+    const char* artifact_hc22000;
 } G5PmkidJsonIn;
 
 typedef struct {
@@ -62,6 +66,13 @@ typedef struct {
     bool have_capture_json;
     bool have_pmkid_22000;
     bool have_pmkid_json;
+    // Exact basenames already chosen for this session. NULL builds one from
+    // session_id + ssid. A value that is not a single safe path segment fails the build.
+    const char* artifact_pcap;
+    const char* artifact_capture_json;
+    const char* artifact_hc22000;
+    const char* artifact_pmkid_json;
+    const char* artifact_audit;
 } G5AuditJsonIn;
 
 bool g5_session_id_valid(const char* session_id);
@@ -82,6 +93,22 @@ size_t g5_audit_basename(
     const char* session_id,
     char* out,
     size_t cap);
+
+// Filename slug: ASCII letters and digits, other bytes become '_', repeats and
+// edges collapsed, capped at G5_SSID_SLUG_MAX. Empty when nothing safe remains.
+size_t g5_ssid_filename_slug(const char* ssid, char* out, size_t cap);
+
+// Legacy basename when ssid sanitizes empty. Otherwise prefix_<slug>_<session>.ext.
+// Same extensions as g5_audit_basename. No directory separators.
+size_t g5_audit_capture_basename(
+    G5AuditFileKind kind,
+    const char* session_id,
+    const char* ssid,
+    char* out,
+    size_t cap);
+
+// Type folder under the app data dir: "handshakes", "pmkid", or "audits".
+const char* g5_audit_kind_subdir(G5AuditFileKind kind);
 
 size_t g5_audit_join_path(
     const char* dir,

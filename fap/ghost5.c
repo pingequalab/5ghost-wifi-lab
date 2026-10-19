@@ -461,7 +461,7 @@ typedef struct Ghost5App {
     bool hs_have_beacon; // beacon captured (carries the SSID into the PCAP)
     bool hs_done;        // HSDONE received -> capture finished
     bool hs_stopping;    // Back pressed: CAPSTOP sent, staying on-scene until HSDONE flushes
-    char hs_path[96];    // path of the written PCAP (valid after a successful flush)
+    char hs_path[128];   // path of the written PCAP (valid after a successful flush)
     char hs_error[24];   // terminal HSERR reason, without the prefix
     char hs_ssid[36];    // target SSID, shown on the capture screen
     char hs_bssid[18];   // target BSSID "AA:BB:CC:DD:EE:FF"
@@ -476,7 +476,7 @@ typedef struct Ghost5App {
     bool pmkid_done;        // terminal state reached (ok/fail/err)
     G5PmkidReport pmkid_report; // accumulated parse of the PMKID: lines (UART worker writes)
     G5PmkidState pmkid_state;   // final classified state (after g5_pmkid_classify_ok)
-    char pmkid_path[96];    // path of the written .22000 (set only after a Valid flush)
+    char pmkid_path[128];   // path of the written .22000 (set only after a Valid flush)
     char pmkid_seen[8][18]; // BSSIDs already captured this session (Duplicate gate)
     int pmkid_seen_count;
     // Guided Audit / evidence pack: set at task start. Empty => each flush mints a
@@ -742,6 +742,13 @@ typedef struct {
 static void ghost_ensure_data_dir(Storage* storage) {
     storage_simply_mkdir(storage, "/ext/apps_data");
     storage_simply_mkdir(storage, GHOST_DATA_DIR);
+    // New writes land in type folders. Flat files already in GHOST_DATA_DIR stay put.
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/scans");
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/handshakes");
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/pmkid");
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/audits");
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/creds");
+    storage_simply_mkdir(storage, GHOST_DATA_DIR "/ble");
 }
 
 // Move leftover 2.7.5 files before any mkdir/seed of the new dir. migrate copies then
@@ -974,7 +981,7 @@ static void ghost_export_scan_csv(Ghost5App* app) {
     snprintf(
         path,
         sizeof(path),
-        GHOST_DATA_DIR "/scan_%04d%02d%02d_%02d%02d%02d.csv",
+        GHOST_DATA_DIR "/scans/scan_%04d%02d%02d_%02d%02d%02d.csv",
         dt.year,
         dt.month,
         dt.day,
@@ -1025,7 +1032,7 @@ static void ghost_save_cred(Ghost5App* app, const char* cred) {
         snprintf(
             app->creds_path,
             sizeof(app->creds_path),
-            GHOST_DATA_DIR "/creds_%04d%02d%02d_%02d%02d%02d.txt",
+            GHOST_DATA_DIR "/creds/creds_%04d%02d%02d_%02d%02d%02d.txt",
             dt.year,
             dt.month,
             dt.day,
@@ -1236,6 +1243,100 @@ static bool ghost_session_path(
     return g5_audit_join_path(GHOST_DATA_DIR, base, out, cap) > 0;
 }
 
+// ghost_evidence_atomic_write appends ".tmp" into a 112-byte stack buffer.
+static bool ghost_path_fits_evidence(const char* path) {
+    return path && path[0] && strlen(path) + 4 < 112;
+}
+
+static G5AuditFileKind ghost_capture_sibling(G5AuditFileKind kind) {
+    switch(kind) {
+    case G5AuditFileCapturePcap:
+        return G5AuditFileCaptureJson;
+    case G5AuditFileCaptureJson:
+        return G5AuditFileCapturePcap;
+    case G5AuditFilePmkid22000:
+        return G5AuditFilePmkidJson;
+    case G5AuditFilePmkidJson:
+        return G5AuditFilePmkid22000;
+    case G5AuditFileAuditJson:
+        return kind;
+    }
+    return kind;
+}
+
+// Flat GHOST_DATA_DIR file from 2.8.0 and earlier. A sibling counts: the pcap and
+// its JSON stay in the same layout.
+static bool ghost_legacy_capture_exists(
+    Storage* storage,
+    G5AuditFileKind kind,
+    const char* session_id) {
+    char path[112];
+    if(!storage) return false;
+    if(ghost_session_path(path, sizeof(path), kind, session_id) &&
+       storage_file_exists(storage, path))
+        return true;
+    const G5AuditFileKind sibling = ghost_capture_sibling(kind);
+    if(sibling == kind) return false;
+    if(!ghost_session_path(path, sizeof(path), sibling, session_id)) return false;
+    return storage_file_exists(storage, path);
+}
+
+static bool ghost_typed_capture_path(
+    char* out,
+    size_t cap,
+    G5AuditFileKind kind,
+    const char* session_id,
+    const char* ssid) {
+    const char* sub = g5_audit_kind_subdir(kind);
+    if(!sub) return false;
+    char base[G5_AUDIT_BASENAME_MAX];
+    if(g5_audit_capture_basename(kind, session_id, ssid, base, sizeof(base)) == 0) return false;
+    char dir[64];
+    const int n = snprintf(dir, sizeof(dir), "%s/%s", GHOST_DATA_DIR, sub);
+    if(n <= 0 || (size_t)n >= sizeof(dir)) return false;
+    if(g5_audit_join_path(dir, base, out, cap) == 0) return false;
+    if(!ghost_path_fits_evidence(out)) {
+        out[0] = '\0';
+        return false;
+    }
+    return true;
+}
+
+// New captures go to a type subfolder and, when the SSID sanitizes, include that
+// slug next to the session id. An existing flat file for this session is reused
+// so a card written by an older build is not split across two layouts.
+static bool ghost_capture_dest(
+    Storage* storage,
+    char* out,
+    size_t cap,
+    G5AuditFileKind kind,
+    const char* session_id,
+    const char* ssid) {
+    if(ghost_legacy_capture_exists(storage, kind, session_id) &&
+       ghost_session_path(out, cap, kind, session_id) && ghost_path_fits_evidence(out))
+        return true;
+    if(ghost_typed_capture_path(out, cap, kind, session_id, ssid)) return true;
+    if(!ghost_session_path(out, cap, kind, session_id) || !ghost_path_fits_evidence(out)) {
+        if(out && cap) out[0] = '\0';
+        return false;
+    }
+    return true;
+}
+
+static const char* ghost_path_basename(const char* path) {
+    const char* slash = path ? strrchr(path, '/') : NULL;
+    return (slash && slash[1]) ? slash + 1 : path;
+}
+
+static bool ghost_store_basename(char* out, size_t cap, const char* path) {
+    const char* base = ghost_path_basename(path);
+    if(!out || cap == 0 || !base || !base[0]) return false;
+    const size_t n = strlen(base);
+    if(n + 1 > cap) return false;
+    memcpy(out, base, n + 1);
+    return true;
+}
+
 // Finalize a capture on the main thread. A valid result is a two-file evidence
 // pack (PCAP + JSON metadata); either both commit or the PCAP is rolled back.
 // Partial/invalid captures write JSON only and never masquerade as a handshake.
@@ -1252,8 +1353,15 @@ static bool ghost_hs_flush(Ghost5App* app) {
     char pcap_path[112];
     char json_path[112];
     if(!ghost_resolve_session_id(app, session_id, sizeof(session_id)) ||
-       !ghost_session_path(pcap_path, sizeof(pcap_path), G5AuditFileCapturePcap, session_id) ||
-       !ghost_session_path(json_path, sizeof(json_path), G5AuditFileCaptureJson, session_id)) {
+       !ghost_capture_dest(
+           storage, pcap_path, sizeof(pcap_path), G5AuditFileCapturePcap, session_id, app->hs_ssid) ||
+       !ghost_capture_dest(
+           storage,
+           json_path,
+           sizeof(json_path),
+           G5AuditFileCaptureJson,
+           session_id,
+           app->hs_ssid)) {
         furi_record_close(RECORD_STORAGE);
         return false;
     }
@@ -4237,8 +4345,15 @@ static void pmkid_flush(Ghost5App* app) {
     char hc_path[112];
     char json_path[112];
     if(!ghost_resolve_session_id(app, session_id, sizeof(session_id)) ||
-       !ghost_session_path(hc_path, sizeof(hc_path), G5AuditFilePmkid22000, session_id) ||
-       !ghost_session_path(json_path, sizeof(json_path), G5AuditFilePmkidJson, session_id)) {
+       !ghost_capture_dest(
+           storage,
+           hc_path,
+           sizeof(hc_path),
+           G5AuditFilePmkid22000,
+           session_id,
+           app->pmkid_ssid) ||
+       !ghost_capture_dest(
+           storage, json_path, sizeof(json_path), G5AuditFilePmkidJson, session_id, app->pmkid_ssid)) {
         furi_record_close(RECORD_STORAGE);
         return;
     }
@@ -4276,6 +4391,8 @@ static void pmkid_flush(Ghost5App* app) {
             .pmkid_hex = app->pmkid_report.pmkid_hex,
             .reason = app->pmkid_report.reason,
             .have_22000 = app->pmkid_path[0] != '\0',
+            .artifact_hc22000 =
+                app->pmkid_path[0] ? ghost_path_basename(app->pmkid_path) : NULL,
         };
         const size_t jn = g5_audit_build_pmkid_json(&in, json, 1024);
         if(jn > 0)
@@ -4707,7 +4824,7 @@ static void ghost_export_ble_csv(Ghost5App* app) {
     snprintf(
         path,
         sizeof(path),
-        GHOST_DATA_DIR "/ble_%04d%02d%02d_%02d%02d%02d.csv",
+        GHOST_DATA_DIR "/ble/ble_%04d%02d%02d_%02d%02d%02d.csv",
         dt.year,
         dt.month,
         dt.day,
@@ -6292,11 +6409,68 @@ static void audit_start_listap(Ghost5App* app) {
 
 static void audit_write_sidecar(Ghost5App* app) {
     if(!g5_session_id_valid(app->session_id)) return;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    ghost_ensure_data_dir(storage);
     char json_path[112];
-    if(!ghost_session_path(json_path, sizeof(json_path), G5AuditFileAuditJson, app->session_id))
-        return;
+    char scratch[112];
+    // Five basenames live on the heap. This scene already shares the 2KB app stack.
+    char* names = malloc(G5_AUDIT_BASENAME_MAX * 5);
     char* json = malloc(1024);
-    if(!json) return;
+    if(!names || !json ||
+       !ghost_capture_dest(
+           storage,
+           json_path,
+           sizeof(json_path),
+           G5AuditFileAuditJson,
+           app->session_id,
+           app->audit_ssid)) {
+        free(names);
+        free(json);
+        furi_record_close(RECORD_STORAGE);
+        return;
+    }
+    char* name_audit = names;
+    char* name_pcap = names + G5_AUDIT_BASENAME_MAX;
+    char* name_capture_json = names + (G5_AUDIT_BASENAME_MAX * 2);
+    char* name_hc = names + (G5_AUDIT_BASENAME_MAX * 3);
+    char* name_pmkid_json = names + (G5_AUDIT_BASENAME_MAX * 4);
+    const bool have_pcap = app->hs_path[0] != '\0';
+    const bool have_capture_json = (app->audit_path == G5AuditPathHs) &&
+                                   ((app->audit_result == G5AuditResultComplete) ||
+                                    (app->audit_result == G5AuditResultPartial));
+    const bool have_hc = app->pmkid_path[0] != '\0';
+    const bool have_pmkid_json = (app->audit_path == G5AuditPathPmkid) && app->pmkid_done;
+    bool names_ok = ghost_store_basename(name_audit, G5_AUDIT_BASENAME_MAX, json_path);
+    if(have_pcap)
+        names_ok = names_ok && ghost_store_basename(name_pcap, G5_AUDIT_BASENAME_MAX, app->hs_path);
+    if(names_ok && have_capture_json) {
+        names_ok = ghost_capture_dest(
+                       storage,
+                       scratch,
+                       sizeof(scratch),
+                       G5AuditFileCaptureJson,
+                       app->session_id,
+                       app->hs_ssid) &&
+                   ghost_store_basename(name_capture_json, G5_AUDIT_BASENAME_MAX, scratch);
+    }
+    if(names_ok && have_hc)
+        names_ok = ghost_store_basename(name_hc, G5_AUDIT_BASENAME_MAX, app->pmkid_path);
+    if(names_ok && have_pmkid_json) {
+        names_ok = ghost_capture_dest(
+                       storage,
+                       scratch,
+                       sizeof(scratch),
+                       G5AuditFilePmkidJson,
+                       app->session_id,
+                       app->pmkid_ssid) &&
+                   ghost_store_basename(name_pmkid_json, G5_AUDIT_BASENAME_MAX, scratch);
+    }
+    if(!names_ok) {
+        free(names);
+        free(json);
+        furi_record_close(RECORD_STORAGE);
+        return;
+    }
     G5AuditJsonIn in = {
         .session_id = app->session_id,
         .ssid = app->audit_ssid,
@@ -6307,20 +6481,20 @@ static void audit_write_sidecar(Ghost5App* app) {
         .fw_caps = app->fw_caps,
         .path = app->audit_path,
         .result = app->audit_result,
-        .have_capture_pcap = app->hs_path[0] != '\0',
-        .have_capture_json = (app->audit_path == G5AuditPathHs) &&
-                             ((app->audit_result == G5AuditResultComplete) ||
-                              (app->audit_result == G5AuditResultPartial)),
-        .have_pmkid_22000 = app->pmkid_path[0] != '\0',
-        .have_pmkid_json = (app->audit_path == G5AuditPathPmkid) && app->pmkid_done,
+        .have_capture_pcap = have_pcap,
+        .have_capture_json = have_capture_json,
+        .have_pmkid_22000 = have_hc,
+        .have_pmkid_json = have_pmkid_json,
+        .artifact_pcap = have_pcap ? name_pcap : NULL,
+        .artifact_capture_json = have_capture_json ? name_capture_json : NULL,
+        .artifact_hc22000 = have_hc ? name_hc : NULL,
+        .artifact_pmkid_json = have_pmkid_json ? name_pmkid_json : NULL,
+        .artifact_audit = name_audit,
     };
     const size_t n = g5_audit_build_audit_json(&in, json, 1024);
-    if(n > 0) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        ghost_ensure_data_dir(storage);
-        ghost_evidence_atomic_write(storage, json_path, (const uint8_t*)json, n);
-        furi_record_close(RECORD_STORAGE);
-    }
+    if(n > 0) ghost_evidence_atomic_write(storage, json_path, (const uint8_t*)json, n);
+    furi_record_close(RECORD_STORAGE);
+    free(names);
     free(json);
 }
 
