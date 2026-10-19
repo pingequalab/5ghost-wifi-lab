@@ -4057,13 +4057,16 @@ static void pmkid_scan_aps(Ghost5App* app) {
     }
     notification_message(app->notif, &sequence_reset_blue);
     ghost_wifi_sweep_finish(app);
+    // Same order as the scan list: strongest RSSI first. idAP travels with the row.
+    // Do not sort on ap_reuse — selectedWifi is an index into the list the user left.
+    if(app->wifiCount > 1) wifi_sort_list(app->wifiList, app->wifiCount);
 }
 
 // Build the picker submenu from the current app->wifiList (all bands) with a Rescan row on top.
 static void pmkid_build_menu(Ghost5App* app) {
     app->submenuIndex = 0;
     submenu_reset(app->submenu);
-    submenu_set_header(app->submenu, "Pick AP (PMKID)");
+    submenu_set_header(app->submenu, "PMKID by signal");
     // Row 0 = Rescan (sentinel id); real AP rows follow at positions 1..N.
     submenu_add_item(app->submenu, "Rescan", GHOST_AP_RESCAN_ID, pmkid_ap_item_callback, app);
     // submenu_set_selected_item matches the item id, not the visual row.
@@ -4135,6 +4138,9 @@ void pmkid_select_scene_on_enter(void* context) {
         if(app->uart_helper && !app->uart_port_busy) {
             uart_helper_send(app->uart_helper, "STOP\n", 5);
         }
+        // Cached LISTAP (scan list / handshake) is not always RSSI-sorted.
+        // Sort before the menu. ap_reuse already returned above, so selectedWifi is not in use.
+        if(app->wifiCount > 1) wifi_sort_list(app->wifiList, app->wifiCount);
         pmkid_build_menu(app);
         return;
     }
