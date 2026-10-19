@@ -308,9 +308,9 @@ char ev_last[96]; // 5Ghost: latest captured credential, handed worker -> main t
 #define GHOST_EVT_BLEADV_DEL 0x21Cu // issue #7: confirm-delete OK -> rewrite bleadv.txt
 #define GHOST_EVT_SSID_TICK \
     0x21Du // scan-list / AP-detail SSID marquee. Timer callback only posts this.
-#define GHOST_SSID_TICK_MS 100 // UI cadence, not a radio timing. Tune on device.
-#define GHOST_SSID_SCROLL_STEP 2
-#define GHOST_SSID_SCROLL_GAP 16 // px held at the end of a long name before wrap
+#define GHOST_SSID_TICK_MS 160 // UI cadence, not a radio timing. Tune on device.
+#define GHOST_SSID_SCROLL_STEP 1 // 1px/160ms (~6px/s); was 2px/100ms (~20px/s)
+#define GHOST_SSID_SCROLL_GAP 24 // px-times held at the start and at the end before moving
 #define AUDIT_TICK_MS 500
 #define AUDIT_LISTAP_TICKS 50
 #define AUDIT_STASCAN_TICKS 24
@@ -1758,15 +1758,18 @@ static void ghost_ui_ssid(const char* ssid, char* out, size_t out_sz) {
     out[j] = '\0';
 }
 
-// Pixel offset into a string wider than max_w. Holds at the end for
-// GHOST_SSID_SCROLL_GAP px, then wraps. UI cadence only — not a radio timing.
+// Pixel offset into a string wider than max_w. Holds at the start for
+// GHOST_SSID_SCROLL_GAP steps, scrolls the excess, holds at the end for the
+// same gap, then wraps. UI cadence only — not a radio timing.
 static int ghost_ui_scroll_off(int full_w, int max_w, uint16_t px) {
     int excess = full_w - max_w;
     if(excess <= 0 || max_w <= 0) return 0;
-    int span = excess + GHOST_SSID_SCROLL_GAP;
-    int mod = (int)(px % (uint16_t)span);
-    if(mod > excess) return excess;
-    return mod;
+    int span = excess + (GHOST_SSID_SCROLL_GAP * 2);
+    if(span <= 0) return 0;
+    int mod = (int)px % span;
+    if(mod < GHOST_SSID_SCROLL_GAP) return 0;
+    if(mod < GHOST_SSID_SCROLL_GAP + excess) return mod - GHOST_SSID_SCROLL_GAP;
+    return excess;
 }
 
 // Draw `text` inside [x, x+max_w). Glyphs that are not fully inside are skipped
